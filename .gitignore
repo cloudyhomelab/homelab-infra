@@ -1,0 +1,16 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!stacks/**/domain.auto.tfvars
+!stacks/**/global.auto.tfvars
+crash.log
+backend_override.tf
+.envrc.local
+
+# Only SOPS-encrypted files may live in secrets/
+secrets/*
+!secrets/*.sops.yaml
+
+docs/
