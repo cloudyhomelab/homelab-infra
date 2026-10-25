@@ -1,6 +1,19 @@
 terraform {
   required_version = ">= 1.11.2"
 
+  # The one required_providers block per stack: OpenTofu allows no second one, so every
+  # provider used anywhere is pinned here, whether or not a stack uses it
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.115.0"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.14.2"
+    }
+  }
+
   # The AWS SDK reads AWS_ENDPOINT_URL_S3 and AWS_REGION (exported by the justfile) and
   # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (from the domain's SOPS file) from the environment.
   # Credentials stay out of this block because `tofu init` saves backend arguments in plain

@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.115.0"
-    }
-  }
-}
-
 variable "proxmox_endpoint" {
   type = string
 }
