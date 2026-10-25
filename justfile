@@ -22,20 +22,27 @@ stacks domain="":
       find "stacks/$d" -name '*.tf' -not -path '*/.terraform/*' -printf '%h\n' | sort -u | sed 's|^stacks/||'
     done
 
-# Run any tofu command in a stack with its domain's secrets loaded
+# Run any tofu command in a stack with the global and its domain's secrets loaded
 tofu stack +args:
     #!/usr/bin/env bash
     set -euo pipefail
     dir="stacks/{{ stack }}"
     domain="{{ stack }}"
     domain="${domain%%/*}"
-    secrets="secrets/${domain}.sops.yaml"
     compgen -G "$dir/*.tf" >/dev/null || { echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1; }
+    # NUL-separated so multi-line values such as SSH keys survive; later files override earlier ones
+    load_secrets() {
+      [[ -f "$1" ]] || return 0
+      local json key value
+      json="$(sops decrypt --output-type json "$1")"
+      while IFS= read -r -d '' key && IFS= read -r -d '' value; do
+        export "$key=$value"
+      done < <(jq -j 'del(.sops) | to_entries[] | .key, "\u0000", (.value | tostring), "\u0000"' <<<"$json")
+    }
+    load_secrets secrets/global.sops.yaml
+    load_secrets "secrets/${domain}.sops.yaml"
     export TF_VAR_state_bucket="{{ state_bucket_prefix }}${domain}"
     export TF_VAR_state_key="${dir#stacks/*/}"
-    if [[ -f "$secrets" ]]; then
-      exec sops exec-env "$secrets" "tofu -chdir=$dir {{ args }}"
-    fi
     exec tofu -chdir="$dir" {{ args }}
 
 init stack *args:

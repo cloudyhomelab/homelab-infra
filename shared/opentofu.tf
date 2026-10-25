@@ -12,6 +12,14 @@ terraform {
       source  = "hashicorp/time"
       version = "0.14.2"
     }
+    keycloak = {
+      source  = "keycloak/keycloak"
+      version = "5.9.0"
+    }
+    dns = {
+      source  = "hashicorp/dns"
+      version = "3.6.2"
+    }
   }
 
   # The AWS SDK reads AWS_ENDPOINT_URL_S3 and AWS_REGION (exported by the justfile) and

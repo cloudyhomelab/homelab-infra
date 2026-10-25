@@ -2,6 +2,8 @@ keys:
   - &primary age1c98gzcp0g5uhtvxec4pg6vpld5ukfx8e6c7vnnldmz3ahw2gxg7sap9jv9
 
 creation_rules:
+  - path_regex: ^secrets/global\.sops\.yaml$
+    age: *primary
   - path_regex: ^secrets/level0\.sops\.yaml$
     age: *primary
   - path_regex: ^secrets/edge\.sops\.yaml$

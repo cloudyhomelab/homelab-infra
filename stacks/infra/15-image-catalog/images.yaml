@@ -1,2 +1,3 @@
 debian:
   - debian-observability
+  - debian-controlplane
