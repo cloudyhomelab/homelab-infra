@@ -30,8 +30,8 @@ domains="$(just --evaluate domains)"
 [[ " $domains " == *" $domain "* ]] || die "unknown domain '$domain' (known: $domains)"
 
 bucket="$(just --evaluate state_bucket_prefix)$domain"
-endpoint="$(just --evaluate AWS_ENDPOINT_URL_S3)"
-region="$(just --evaluate AWS_REGION)"
+endpoint="$(just --evaluate state_endpoint)"
+region="$(just --evaluate state_region)"
 secrets="secrets/$domain.sops.yaml"
 
 # --profile outranks AWS_* credential variables, so a stray key in the shell cannot be used
