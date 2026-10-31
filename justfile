@@ -6,10 +6,11 @@ domains := "level0 edge infra apps"
 # One state bucket per domain: <prefix><domain>
 state_bucket_prefix := "tofu-state-"
 
-# S3 server holding state, read by the backend, remote state reads and scripts/s3-state.sh
-export AWS_ENDPOINT_URL_S3 := "https://s3-api.cloudyhome.net"
-export AWS_REGION := "home"
+# S3 server holding state, passed to the backend and read by scripts/s3-state.sh
+state_endpoint := "https://s3-api.cloudyhome.net"
+state_region := "home"
 
+# Show this list
 default:
     @just --list
 
@@ -41,19 +42,25 @@ tofu stack +args:
     }
     load_secrets secrets/global.sops.yaml
     load_secrets "secrets/${domain}.sops.yaml"
+    export TF_VAR_state_endpoint="{{ state_endpoint }}"
+    export TF_VAR_state_region="{{ state_region }}"
     export TF_VAR_state_bucket="{{ state_bucket_prefix }}${domain}"
     export TF_VAR_state_key="${dir#stacks/*/}"
     exec tofu -chdir="$dir" {{ args }}
 
+# Initialise one stack's backend and providers
 init stack *args:
     @just tofu {{ stack }} init {{ args }}
 
+# Plan one stack
 plan stack *args:
     @just tofu {{ stack }} plan {{ args }}
 
+# Apply one stack
 apply stack *args:
     @just tofu {{ stack }} apply {{ args }}
 
+# Initialise every stack in a domain
 init-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -62,6 +69,16 @@ init-domain domain:
       just init "$s"
     done
 
+# Re-initialise every stack in a domain after a backend config change, keeping state in place
+reconfigure-domain domain:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for s in $(just stacks {{ domain }}); do
+      echo "==> $s"
+      just tofu "$s" init -reconfigure
+    done
+
+# Plan every stack in a domain, in apply order
 plan-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -70,7 +87,7 @@ plan-domain domain:
       just plan "$s"
     done
 
-# Applies each stack in order, each with its own approval prompt
+# Apply every stack in a domain in order, each with its own approval prompt
 apply-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -84,8 +101,10 @@ secrets domain:
     mkdir -p secrets
     sops secrets/{{ domain }}.sops.yaml
 
+# Format all OpenTofu files
 fmt:
     tofu fmt -recursive
 
+# Run all pre-commit checks on every file
 lint:
     pre-commit run --all-files

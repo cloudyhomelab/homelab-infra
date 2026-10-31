@@ -22,13 +22,14 @@ terraform {
     }
   }
 
-  # The AWS SDK reads AWS_ENDPOINT_URL_S3 and AWS_REGION (exported by the justfile) and
-  # AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (from the domain's SOPS file) from the environment.
-  # Credentials stay out of this block because `tofu init` saves backend arguments in plain
-  # text under .terraform/.
+  # The AWS SDK reads AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (from the domain's SOPS file) from
+  # the environment. Credentials stay out of this block because `tofu init` saves backend arguments
+  # in plain text under .terraform/.
   backend "s3" {
     bucket                      = local.state_backend.bucket
     key                         = "${var.state_key}.tfstate"
+    endpoints                   = local.state_backend.endpoints
+    region                      = local.state_backend.region
     use_path_style              = local.state_backend.use_path_style
     use_lockfile                = local.state_backend.use_lockfile
     skip_credentials_validation = local.state_backend.skip_credentials_validation
@@ -64,6 +65,8 @@ locals {
   # Shared by the backend and terraform_remote_state reads of other stacks in the domain
   state_backend = {
     bucket                      = var.state_bucket
+    endpoints                   = { s3 = var.state_endpoint }
+    region                      = var.state_region
     use_path_style              = true
     use_lockfile                = true
     skip_credentials_validation = true
@@ -75,6 +78,16 @@ locals {
 
 variable "state_bucket" {
   description = "The domain's state bucket, set by the justfile."
+  type        = string
+}
+
+variable "state_endpoint" {
+  description = "URL of the S3 server holding state, set by the justfile."
+  type        = string
+}
+
+variable "state_region" {
+  description = "Region sent to the S3 server, set by the justfile."
   type        = string
 }
 
