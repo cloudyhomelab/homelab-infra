@@ -18,3 +18,39 @@ variable "token_grace_days" {
   description = "Days a token stays valid after its rotation is due, covering a late apply."
   type        = number
 }
+
+# tflint-ignore: terraform_unused_declarations
+variable "acme_account_name" {
+  description = "The ACME account config name."
+  type        = string
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "acme_contact_email" {
+  description = "The contact email address."
+  type        = string
+  sensitive   = true
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "pve_search_domain" {
+  description = "Domain for the PVE nodes."
+  type        = string
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "porkbun_api_key" {
+  description = "Porkbun API key for DNS."
+  type        = string
+  sensitive   = true
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "porkbun_secret_api_key" {
+  description = "Porkbun secret API key for DNS."
+  type        = string
+  sensitive   = true
+}

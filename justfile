@@ -69,7 +69,7 @@ init-domain domain:
       just init "$s"
     done
 
-# Re-initialise every stack in a domain after a backend config change, keeping state in place
+# Re-initialise every stack in a domain after a config change, keeping state in place
 reconfigure-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -77,6 +77,16 @@ reconfigure-domain domain:
       echo "==> $s"
       just tofu "$s" init -reconfigure
     done
+
+# Upgrade every stack in a domain to reselect module and provider after version upgrades
+upgrade-domain domain:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for s in $(just stacks {{ domain }}); do
+      echo "==> $s"
+      just tofu "$s" init -upgrade
+    done
+
 
 # Plan every stack in a domain, in apply order
 plan-domain domain:

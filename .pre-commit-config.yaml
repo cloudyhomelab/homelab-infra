@@ -17,13 +17,13 @@ repos:
       - id: terraform_fmt
         args:
           - --hook-config=--tf-path=tofu
-      # shared/ holds fragments, validated through the stacks that symlink them
+      # shared/ and top-level stacks/ files are fragments, validated through the stacks that symlink them
       - id: terraform_validate
-        exclude: ^shared/
+        exclude: ^(shared/|stacks/[^/]+$)
         args:
           - --hook-config=--tf-path=tofu
       - id: terraform_tflint
-        exclude: ^shared/
+        exclude: ^(shared/|stacks/[^/]+$)
         args:
           - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
       - id: terraform_trivy
