@@ -10,7 +10,9 @@ module "proxmox_init" {
   source          = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-proxmox-init?ref=main"
   expiration_date = local.token_expiration
   # A new name per rotation forces a new token; changing only the expiry would keep the old secret
-  token_name = "terraform-${formatdate("YYYYMMDD", time_rotating.token.id)}"
+  token_name         = "terraform-${formatdate("YYYYMMDD", time_rotating.token.id)}"
+  acme_account_name  = var.acme_account_name
+  acme_contact_email = var.acme_contact_email
 }
 
 output "user_token" {
