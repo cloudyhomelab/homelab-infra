@@ -8,6 +8,12 @@ module "proxmox_setup" {
   acme_dns          = local.acme_dns
 }
 
+module "proxmox_sdn" {
+  source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-proxmox-sdn?ref=main"
+  bridge = "vmbr0"
+  zones  = yamldecode(file("${path.module}/sdn.yaml"))
+}
+
 import {
   to = module.proxmox_setup.proxmox_storage_directory.this
   id = "local"
