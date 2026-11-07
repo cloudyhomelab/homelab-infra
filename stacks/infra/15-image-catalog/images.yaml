@@ -1,3 +1,7 @@
 debian:
-  - debian-observability
   - debian-controlplane
+  - debian-edge
+  - debian-iot-ingress-control
+  - debian-lab-ingress-control
+  - debian-management-ingress-control
+  - debian-observability
