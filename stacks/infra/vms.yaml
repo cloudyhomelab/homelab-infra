@@ -1,0 +1,10 @@
+---
+# VM name => image catalog key (<os>/<type>)
+# Read by the VM stacks and the storage playbook
+controlplane: debian/debian-controlplane
+observability: debian/debian-observability
+mgmt-ctl: debian/debian-management-ingress-control
+lab-ctl: debian/debian-lab-ingress-control
+iot-ctl: debian/debian-iot-ingress-control
+edge-ctl: debian/debian-edge
+arr-stack: debian/debian-arr-stack

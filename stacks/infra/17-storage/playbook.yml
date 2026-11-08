@@ -1,0 +1,71 @@
+---
+- name: Storage for the domain's images
+  hosts: truenas
+  gather_facts: false
+  vars:
+    domain: "{{ playbook_dir | dirname | basename }}"
+    app_data_root: "{{ truenas_pool }}/cloudyhome_app_data"
+    vms: "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../vms.yaml') | from_yaml }}"
+    zone: "{{ lookup('ansible.builtin.env', 'TF_VAR_dns_zone') }}"
+
+  tasks:
+    - name: Read the image catalog
+      ansible.builtin.command:
+        argv: [just, tofu, "{{ domain }}/15-image-catalog", output, -json, latest]
+      delegate_to: localhost
+      changed_when: false
+      check_mode: false
+      register: catalog
+
+    - name: Work out the exports
+      ansible.builtin.set_fact:
+        exports: "{{ catalog.stdout | from_json | storage_exports(vms, zone) }}"
+
+    - name: Read current datasets
+      ansible.builtin.command:
+        argv:
+          - midclt
+          - call
+          - pool.dataset.query
+          - "{{ [['id', '=', app_data_root ~ '/' ~ item.app ~ '/' ~ item.dataset]] | to_json }}"
+          - '{"extra": {"retrieve_children": false}}'
+      loop: "{{ exports }}"
+      loop_control:
+        label: "{{ item.app }}/{{ item.dataset }}"
+      changed_when: false
+      check_mode: false
+      register: datasets
+
+    - name: Create datasets
+      arensb.truenas.filesystem:
+        name: "{{ app_data_root }}/{{ item.0.app }}/{{ item.0.dataset }}"
+        create_ancestors: true
+        recordsize: "{{ item.1.stdout | recordsize_update(item.0.recordsize | default(none)) | default(omit, true) }}"
+      loop: "{{ exports | zip(datasets.results) }}"
+      loop_control:
+        label: "{{ item.0.app }}/{{ item.0.dataset }}"
+
+    - name: Read current shares
+      ansible.builtin.command:
+        argv:
+          - midclt
+          - call
+          - sharing.nfs.query
+          - "{{ [['path', '=', '/mnt/' ~ app_data_root ~ '/' ~ item.app ~ '/' ~ item.dataset]] | to_json }}"
+      loop: "{{ exports }}"
+      loop_control:
+        label: "{{ item.app }}/{{ item.dataset }}"
+      changed_when: false
+      check_mode: false
+      register: shares
+
+    - name: Share datasets over NFS
+      arensb.truenas.sharing_nfs:
+        path: "/mnt/{{ app_data_root }}/{{ item.0.app }}/{{ item.0.dataset }}"
+        maproot_user: root
+        maproot_group: root
+        networks: []
+        hosts: "{{ item.1.stdout | merged_hosts(item.0.hosts) }}"
+      loop: "{{ exports | zip(shares.results) }}"
+      loop_control:
+        label: "{{ item.0.app }}/{{ item.0.dataset }}"
