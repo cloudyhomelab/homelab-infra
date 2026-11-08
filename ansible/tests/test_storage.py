@@ -3,19 +3,20 @@ import json
 import pytest
 from ansible.errors import AnsibleFilterError
 
-from storage import merged_hosts, recordsize_update, storage_exports
+from storage import merged_comment, merged_hosts, recordsize_update, storage_exports
 
 ZONE = "lab.example"
 
 CATALOG = {
     "debian/app": {
+        "type": "app",
         "storage": [
             {"app": "web", "dataset": "db", "recordsize": "32K"},
             {"app": "web", "dataset": "data"},
         ]
     },
-    "debian/plain": {"storage": []},
-    "debian/old": {},
+    "debian/plain": {"type": "plain", "storage": []},
+    "debian/old": {"type": "old"},
 }
 
 
@@ -23,8 +24,14 @@ def test_exports_per_dataset_with_hosts():
     exports = storage_exports(CATALOG, {"vm1": "debian/app", "vm0": "debian/app"}, ZONE)
 
     assert exports == [
-        {"app": "web", "dataset": "data", "hosts": ["vm0.lab.example", "vm1.lab.example"]},
-        {"app": "web", "dataset": "db", "recordsize": "32K", "hosts": ["vm0.lab.example", "vm1.lab.example"]},
+        {"app": "web", "dataset": "data", "hosts": ["vm0.lab.example", "vm1.lab.example"], "images": ["app"]},
+        {
+            "app": "web",
+            "dataset": "db",
+            "recordsize": "32K",
+            "hosts": ["vm0.lab.example", "vm1.lab.example"],
+            "images": ["app"],
+        },
     ]
 
 
@@ -33,16 +40,17 @@ def test_images_without_storage_give_nothing():
 
 
 def test_images_sharing_a_dataset_share_the_export():
-    catalog = {**CATALOG, "debian/other": {"storage": [{"app": "web", "dataset": "data"}]}}
+    catalog = {**CATALOG, "debian/other": {"type": "other", "storage": [{"app": "web", "dataset": "data"}]}}
 
     exports = storage_exports(catalog, {"vm1": "debian/app", "vm2": "debian/other"}, ZONE)
 
     data = next(e for e in exports if e["dataset"] == "data")
     assert data["hosts"] == ["vm1.lab.example", "vm2.lab.example"]
+    assert data["images"] == ["app", "other"]
 
 
 def test_conflicting_recordsize_fails():
-    catalog = {**CATALOG, "debian/other": {"storage": [{"app": "web", "dataset": "db", "recordsize": "1M"}]}}
+    catalog = {**CATALOG, "debian/other": {"type": "other", "storage": [{"app": "web", "dataset": "db", "recordsize": "1M"}]}}
 
     with pytest.raises(AnsibleFilterError, match="recordsize"):
         storage_exports(catalog, {"vm1": "debian/app", "vm2": "debian/other"}, ZONE)
@@ -55,7 +63,7 @@ def test_unknown_image_fails():
 
 @pytest.mark.parametrize("name", ["..", ".", "a/b", "", ".hidden"])
 def test_unsafe_names_fail(name):
-    catalog = {"debian/bad": {"storage": [{"app": name, "dataset": "data"}]}}
+    catalog = {"debian/bad": {"type": "bad", "storage": [{"app": name, "dataset": "data"}]}}
 
     with pytest.raises(AnsibleFilterError, match="invalid storage name"):
         storage_exports(catalog, {"vm1": "debian/bad"}, ZONE)
@@ -104,3 +112,19 @@ def test_recordsize_for_a_new_dataset():
 
 def test_recordsize_not_requested():
     assert recordsize_update(dataset_query("131072"), None) is None
+
+
+def share_query(comment):
+    return json.dumps([{"path": "/mnt/p/x", "comment": comment, "hosts": []}])
+
+
+def test_merged_comment_keeps_current_and_adds_missing():
+    assert merged_comment(share_query("other, app"), ["app", "third"]) == "other, app, third"
+
+
+def test_merged_comment_replaces_an_empty_comment():
+    assert merged_comment(share_query(""), ["app"]) == "app"
+
+
+def test_merged_comment_for_a_new_share():
+    assert merged_comment("[]", ["app", "other"]) == "app, other"
