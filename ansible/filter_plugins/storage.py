@@ -13,7 +13,8 @@ def storage_exports(catalog, vms, zone):
 
     catalog: the image catalog's `latest` output, keyed by <os>/<type>.
     vms: VM name => catalog key.
-    Returns [{app, dataset, recordsize?, hosts}] sorted by app and dataset, hosts as sorted FQDNs.
+    Returns [{app, dataset, recordsize?, hosts, images}] sorted by app and dataset, hosts as sorted FQDNs,
+    images as sorted image names.
     """
     if not zone:
         raise AnsibleFilterError("zone is empty")
@@ -29,7 +30,7 @@ def storage_exports(catalog, vms, zone):
                 if not SEGMENT.match(segment):
                     raise AnsibleFilterError(f"image {image}: invalid storage name {segment!r}")
 
-            export = {"app": key[0], "dataset": key[1], "hosts": []}
+            export = {"app": key[0], "dataset": key[1], "hosts": [], "images": []}
             if "recordsize" in entry:
                 export["recordsize"] = entry["recordsize"]
             known = exports.setdefault(key, export)
@@ -40,6 +41,7 @@ def storage_exports(catalog, vms, zone):
                 )
             first_image.setdefault(key, image)
             known["hosts"] = sorted({*known["hosts"], f"{vm}.{zone}"})
+            known["images"] = sorted({*known["images"], catalog[image]["type"]})
 
     return [exports[key] for key in sorted(exports)]
 
@@ -61,19 +63,32 @@ def recordsize_update(dataset_query, recordsize):
     return None if current == wanted else recordsize
 
 
+def merged_comment(share_query, images):
+    """The share's comment as a ", "-joined list of image names: those already listed, plus the missing given ones."""
+    shares = _single_share(share_query)
+    current = [name for name in shares[0]["comment"].split(", ") if name] if shares else []
+    return ", ".join(current + [name for name in images if name not in current])
+
+
 def merged_hosts(share_query, hosts):
     """Hosts already allowed on the share, given as a `sharing.nfs.query` JSON result, plus the missing given ones."""
+    shares = _single_share(share_query)
+    current = shares[0]["hosts"] if shares else []
+    return current + [host for host in hosts if host not in current]
+
+
+def _single_share(share_query):
     shares = json.loads(share_query)
     if len(shares) > 1:
         raise AnsibleFilterError(f"{len(shares)} shares match one path")
-    current = shares[0]["hosts"] if shares else []
-    return current + [host for host in hosts if host not in current]
+    return shares
 
 
 class FilterModule:
     def filters(self):
         return {
             "storage_exports": storage_exports,
+            "merged_comment": merged_comment,
             "merged_hosts": merged_hosts,
             "recordsize_update": recordsize_update,
         }

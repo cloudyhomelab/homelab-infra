@@ -61,6 +61,7 @@
 
     - name: Share datasets over NFS
       arensb.truenas.sharing_nfs:
+        name: "{{ item.1.stdout | merged_comment(item.0.images) }}"
         path: "/mnt/{{ app_data_root }}/{{ item.0.app }}/{{ item.0.dataset }}"
         maproot_user: root
         maproot_group: root
