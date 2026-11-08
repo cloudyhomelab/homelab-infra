@@ -10,6 +10,8 @@ state_bucket_prefix := "tofu-state-"
 state_endpoint := "http://moria.ip.cloudyhome.net:9000"
 state_region := "home"
 
+ansible_config := justfile_directory() / "ansible/ansible.cfg"
+
 # Show this list
 default:
     @just --list
@@ -20,8 +22,26 @@ stacks domain="":
     set -euo pipefail
     for d in {{ if domain == "" { domains } else { domain } }}; do
       [[ -d "stacks/$d" ]] || continue
-      find "stacks/$d" -name '*.tf' -not -path '*/.terraform/*' -printf '%h\n' | sort -u | sed 's|^stacks/||'
+      find "stacks/$d" -mindepth 2 -maxdepth 2 \( -name '*.tf' -o -name playbook.yml \) -printf '%h\n' \
+        | sort -u | sed 's|^stacks/||' \
+        | while read -r s; do just _kind "$s" >/dev/null; echo "$s"; done
     done
+
+# Print a stack's tool: tofu for *.tf, ansible for playbook.yml
+[private]
+_kind stack:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dir="stacks/{{ stack }}"
+    tf=0; pb=0
+    compgen -G "$dir/*.tf" >/dev/null && tf=1
+    [[ -f "$dir/playbook.yml" ]] && pb=1
+    case "$tf$pb" in
+      10) echo tofu ;;
+      01) echo ansible ;;
+      11) echo "stack holds both *.tf and playbook.yml: {{ stack }}" >&2; exit 1 ;;
+      *) echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1 ;;
+    esac
 
 # Run any tofu command in a stack with the global and its domain's secrets loaded
 tofu stack +args:
@@ -30,63 +50,87 @@ tofu stack +args:
     dir="stacks/{{ stack }}"
     domain="{{ stack }}"
     domain="${domain%%/*}"
-    compgen -G "$dir/*.tf" >/dev/null || { echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1; }
-    # NUL-separated so multi-line values such as SSH keys survive; later files override earlier ones
-    load_secrets() {
-      [[ -f "$1" ]] || return 0
-      local json key value
-      json="$(sops decrypt --output-type json "$1")"
-      while IFS= read -r -d '' key && IFS= read -r -d '' value; do
-        export "$key=$value"
-      done < <(jq -j 'del(.sops) | to_entries[] | .key, "\u0000", (.value | tostring), "\u0000"' <<<"$json")
-    }
-    load_secrets secrets/global.sops.yaml
-    load_secrets "secrets/${domain}.sops.yaml"
+    [[ "$(just _kind {{ stack }})" == tofu ]] || { echo "not a tofu stack: {{ stack }}" >&2; exit 1; }
+    source scripts/load-secrets.sh "$domain"
     export TF_VAR_state_endpoint="{{ state_endpoint }}"
     export TF_VAR_state_region="{{ state_region }}"
     export TF_VAR_state_bucket="{{ state_bucket_prefix }}${domain}"
     export TF_VAR_state_key="${dir#stacks/*/}"
     exec tofu -chdir="$dir" {{ args }}
 
-# Initialise one stack's backend and providers
+# Run a stack's playbook with ansible-playbook and extra args, the global and its domain's secrets loaded
+ansible stack *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    domain="{{ stack }}"
+    domain="${domain%%/*}"
+    [[ "$(just _kind {{ stack }})" == ansible ]] || { echo "not an ansible stack: {{ stack }}" >&2; exit 1; }
+    source scripts/load-secrets.sh "$domain"
+    export ANSIBLE_CONFIG="{{ ansible_config }}"
+    exec ansible-playbook "stacks/{{ stack }}/playbook.yml" {{ args }}
+
+# Initialise one stack: tofu backend and providers, or the pinned Ansible collections
 init stack *args:
-    @just tofu {{ stack }} init {{ args }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$(just _kind {{ stack }})" in
+      tofu) just tofu {{ stack }} init {{ args }} ;;
+      ansible) ANSIBLE_CONFIG="{{ ansible_config }}" ansible-galaxy collection install -r ansible/requirements.yml {{ args }} ;;
+    esac
 
-# Plan one stack
+# Plan one stack; an Ansible stack runs in check mode with diff
 plan stack *args:
-    @just tofu {{ stack }} plan {{ args }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$(just _kind {{ stack }})" in
+      tofu) just tofu {{ stack }} plan {{ args }} ;;
+      ansible) just ansible {{ stack }} --check --diff {{ args }} ;;
+    esac
 
-# Apply one stack
+# Apply one stack; an Ansible stack applies without an approval prompt
 apply stack *args:
-    @just tofu {{ stack }} apply {{ args }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$(just _kind {{ stack }})" in
+      tofu) just tofu {{ stack }} apply {{ args }} ;;
+      ansible) just ansible {{ stack }} --diff {{ args }} ;;
+    esac
 
-# Destroy one stack's resources; its emptied state object stays in the bucket
+# Destroy one tofu stack's resources; its emptied state object stays in the bucket
 destroy stack *args:
-    @just tofu {{ stack }} destroy {{ args }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ "$(just _kind {{ stack }})" == tofu ]] || { echo "only tofu stacks can be destroyed: {{ stack }}" >&2; exit 1; }
+    just tofu {{ stack }} destroy {{ args }}
 
 # Initialise every stack in a domain
 init-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
-    for s in $(just stacks {{ domain }}); do
+    stacks="$(just stacks {{ domain }})"
+    for s in $stacks; do
       echo "==> $s"
       just init "$s"
     done
 
-# Re-initialise every stack in a domain after a config change, keeping state in place
+# Re-initialise every tofu stack in a domain after a config change, keeping state in place
 reconfigure-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
-    for s in $(just stacks {{ domain }}); do
+    stacks="$(just stacks {{ domain }})"
+    for s in $stacks; do
+      [[ "$(just _kind "$s")" == tofu ]] || continue
       echo "==> $s"
       just tofu "$s" init -reconfigure
     done
 
-# Upgrade every stack in a domain to reselect module and provider after version upgrades
+# Upgrade every tofu stack in a domain to reselect module and provider after version upgrades
 upgrade-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
-    for s in $(just stacks {{ domain }}); do
+    stacks="$(just stacks {{ domain }})"
+    for s in $stacks; do
+      [[ "$(just _kind "$s")" == tofu ]] || continue
       echo "==> $s"
       just tofu "$s" init -upgrade
     done
@@ -96,7 +140,8 @@ upgrade-domain domain:
 plan-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
-    for s in $(just stacks {{ domain }}); do
+    stacks="$(just stacks {{ domain }})"
+    for s in $stacks; do
       echo "==> $s"
       just plan "$s"
     done
@@ -105,7 +150,8 @@ plan-domain domain:
 apply-domain domain:
     #!/usr/bin/env bash
     set -euo pipefail
-    for s in $(just stacks {{ domain }}); do
+    stacks="$(just stacks {{ domain }})"
+    for s in $stacks; do
       echo "==> $s"
       just apply "$s"
     done
