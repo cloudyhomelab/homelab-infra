@@ -7,7 +7,7 @@ domains := "level0 edge infra apps"
 state_bucket_prefix := "tofu-state-"
 
 # S3 server holding state, passed to the backend and read by scripts/s3-state.sh
-state_endpoint := "https://s3-api.cloudyhome.net"
+state_endpoint := "http://moria.ip.cloudyhome.net:9000"
 state_region := "home"
 
 # Show this list
