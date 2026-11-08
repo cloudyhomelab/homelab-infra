@@ -1,3 +1,7 @@
+locals {
+  vms = yamldecode(file("${path.module}/../vms.yaml"))
+}
+
 data "terraform_remote_state" "image_catalog" {
   backend = "s3"
   config  = merge(local.state_backend, { key = "15-image-catalog.tfstate" })
@@ -6,7 +10,7 @@ data "terraform_remote_state" "image_catalog" {
 module "arr-stack" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-debian?ref=main"
 
-  image = data.terraform_remote_state.image_catalog.outputs.latest["debian/debian-arr-stack"].image
+  image = data.terraform_remote_state.image_catalog.outputs.latest[local.vms["arr-stack"]].image
 
   ca_server_url    = var.ca_server_url
   ca_sso_realm     = var.ca_sso_realm

@@ -1,3 +1,7 @@
+locals {
+  vms = yamldecode(file("${path.module}/../vms.yaml"))
+}
+
 data "terraform_remote_state" "image_catalog" {
   backend = "s3"
   config  = merge(local.state_backend, { key = "15-image-catalog.tfstate" })
@@ -6,7 +10,7 @@ data "terraform_remote_state" "image_catalog" {
 module "mgmt-ctl" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-debian?ref=main"
 
-  image = data.terraform_remote_state.image_catalog.outputs.latest["debian/debian-management-ingress-control"].image
+  image = data.terraform_remote_state.image_catalog.outputs.latest[local.vms["mgmt-ctl"]].image
 
   ca_server_url    = var.ca_server_url
   ca_sso_realm     = var.ca_sso_realm
@@ -28,7 +32,7 @@ module "mgmt-ctl" {
 module "lab-ctl" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-debian?ref=main"
 
-  image = data.terraform_remote_state.image_catalog.outputs.latest["debian/debian-lab-ingress-control"].image
+  image = data.terraform_remote_state.image_catalog.outputs.latest[local.vms["lab-ctl"]].image
 
   ca_server_url    = var.ca_server_url
   ca_sso_realm     = var.ca_sso_realm
@@ -50,7 +54,7 @@ module "lab-ctl" {
 module "iot-ctl" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-debian?ref=main"
 
-  image = data.terraform_remote_state.image_catalog.outputs.latest["debian/debian-iot-ingress-control"].image
+  image = data.terraform_remote_state.image_catalog.outputs.latest[local.vms["iot-ctl"]].image
 
   ca_server_url    = var.ca_server_url
   ca_sso_realm     = var.ca_sso_realm
@@ -72,7 +76,7 @@ module "iot-ctl" {
 module "edge-ctl" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-debian?ref=main"
 
-  image = data.terraform_remote_state.image_catalog.outputs.latest["debian/debian-edge"].image
+  image = data.terraform_remote_state.image_catalog.outputs.latest[local.vms["edge-ctl"]].image
 
   ca_server_url    = var.ca_server_url
   ca_sso_realm     = var.ca_sso_realm
