@@ -60,6 +60,10 @@ plan stack *args:
 apply stack *args:
     @just tofu {{ stack }} apply {{ args }}
 
+# Destroy one stack's resources; its emptied state object stays in the bucket
+destroy stack *args:
+    @just tofu {{ stack }} destroy {{ args }}
+
 # Initialise every stack in a domain
 init-domain domain:
     #!/usr/bin/env bash
