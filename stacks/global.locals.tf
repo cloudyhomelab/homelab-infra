@@ -1,5 +1,8 @@
 locals {
   # tflint-ignore: terraform_unused_declarations
+  s3_url = "http://moria.ip.cloudyhome.net:9000"
+
+  # tflint-ignore: terraform_unused_declarations
   acme_dns = {
     plugin           = "porkbun"
     api              = "porkbun"
