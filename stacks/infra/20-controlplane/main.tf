@@ -30,5 +30,6 @@ module "controlplane" {
     user_id      = var.vm_user_id
     timezone     = var.timezone
     searchdomain = var.dns_zone
+    reverse_zone = var.reverse_zone
   }
 }

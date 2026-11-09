@@ -54,3 +54,10 @@ variable "porkbun_secret_api_key" {
   type        = string
   sensitive   = true
 }
+
+# tflint-ignore: terraform_unused_declarations
+variable "reverse_zone" {
+  description = "in-addr.arpa zone that holds the PTR records of the VM addresses."
+  type        = string
+  nullable    = false
+}
