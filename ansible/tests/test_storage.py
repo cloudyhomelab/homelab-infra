@@ -20,8 +20,16 @@ CATALOG = {
 }
 
 
+def domain(vms, defaults=None):
+    """A vms.yaml document; a VM given as a string is a DHCP VM with that image."""
+    return {
+        "defaults": defaults or {},
+        "vms": {key: {"image": vm, "dhcp": True} if isinstance(vm, str) else vm for key, vm in vms.items()},
+    }
+
+
 def test_exports_per_dataset_with_hosts():
-    exports = storage_exports(CATALOG, {"vm1": "debian/app", "vm0": "debian/app"}, ZONE)
+    exports = storage_exports(CATALOG, domain({"vm1": "debian/app", "vm0": "debian/app"}), ZONE)
 
     assert exports == [
         {"app": "web", "dataset": "data", "hosts": ["vm0.lab.example", "vm1.lab.example"], "images": ["app"]},
@@ -35,14 +43,38 @@ def test_exports_per_dataset_with_hosts():
     ]
 
 
+def test_static_vm_is_allowed_by_address():
+    vms = domain({
+        "dns": {"image": "debian/app", "name": "ns", "dhcp": False, "ip4_address_cidr": "10.0.0.5/24"},
+        "vm1": "debian/app",
+    })
+
+    assert storage_exports(CATALOG, vms, ZONE)[0]["hosts"] == ["10.0.0.5", "vm1.lab.example"]
+
+
+def test_dhcp_vm_is_allowed_by_its_name():
+    vms = domain({"key": {"image": "debian/app", "name": "renamed", "dhcp": True}})
+
+    assert storage_exports(CATALOG, vms, ZONE)[0]["hosts"] == ["renamed.lab.example"]
+
+
+def test_vm_settings_override_defaults():
+    vms = domain(
+        {"vm1": {"image": "debian/app", "ip4_address_cidr": "10.0.0.5/24"}, "vm2": {"image": "debian/app", "dhcp": True}},
+        defaults={"dhcp": False},
+    )
+
+    assert storage_exports(CATALOG, vms, ZONE)[0]["hosts"] == ["10.0.0.5", "vm2.lab.example"]
+
+
 def test_images_without_storage_give_nothing():
-    assert storage_exports(CATALOG, {"a": "debian/plain", "b": "debian/old"}, ZONE) == []
+    assert storage_exports(CATALOG, domain({"a": "debian/plain", "b": "debian/old"}), ZONE) == []
 
 
 def test_images_sharing_a_dataset_share_the_export():
     catalog = {**CATALOG, "debian/other": {"type": "other", "storage": [{"app": "web", "dataset": "data"}]}}
 
-    exports = storage_exports(catalog, {"vm1": "debian/app", "vm2": "debian/other"}, ZONE)
+    exports = storage_exports(catalog, domain({"vm1": "debian/app", "vm2": "debian/other"}), ZONE)
 
     data = next(e for e in exports if e["dataset"] == "data")
     assert data["hosts"] == ["vm1.lab.example", "vm2.lab.example"]
@@ -53,12 +85,12 @@ def test_conflicting_recordsize_fails():
     catalog = {**CATALOG, "debian/other": {"type": "other", "storage": [{"app": "web", "dataset": "db", "recordsize": "1M"}]}}
 
     with pytest.raises(AnsibleFilterError, match="recordsize"):
-        storage_exports(catalog, {"vm1": "debian/app", "vm2": "debian/other"}, ZONE)
+        storage_exports(catalog, domain({"vm1": "debian/app", "vm2": "debian/other"}), ZONE)
 
 
 def test_unknown_image_fails():
     with pytest.raises(AnsibleFilterError, match="not in the catalog"):
-        storage_exports(CATALOG, {"vm1": "debian/missing"}, ZONE)
+        storage_exports(CATALOG, domain({"vm1": "debian/missing"}), ZONE)
 
 
 @pytest.mark.parametrize("name", ["..", ".", "a/b", "", ".hidden"])
@@ -66,12 +98,12 @@ def test_unsafe_names_fail(name):
     catalog = {"debian/bad": {"type": "bad", "storage": [{"app": name, "dataset": "data"}]}}
 
     with pytest.raises(AnsibleFilterError, match="invalid storage name"):
-        storage_exports(catalog, {"vm1": "debian/bad"}, ZONE)
+        storage_exports(catalog, domain({"vm1": "debian/bad"}), ZONE)
 
 
 def test_empty_zone_fails():
     with pytest.raises(AnsibleFilterError, match="zone"):
-        storage_exports(CATALOG, {"vm1": "debian/app"}, "")
+        storage_exports(CATALOG, domain({"vm1": "debian/app"}), "")
 
 
 def test_merged_hosts_keeps_current_and_adds_missing():

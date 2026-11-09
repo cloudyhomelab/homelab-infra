@@ -1,4 +1,17 @@
 ---
-# VM name => image catalog key (<os>/<type>)
-# Read by the VM stacks
-dns-primary: debian/debian-dns-primary
+# Every VM of the domain. Read by the VM stacks, which pick theirs by key.
+# defaults: config fields every VM gets unless it sets its own.
+# vms: key => image (catalog key <os>/<type>) plus the module's config fields; name defaults to the key.
+defaults:
+  node: pve-lab-1
+
+vms:
+  dns-primary:
+    image: debian/debian-dns-primary
+    name: ns1
+    bridge: LabNet
+    dhcp: false
+    ip4_address_cidr: 10.88.16.11/24
+    gateway: 10.88.16.1
+    dns_addresses: [10.88.16.1]
+    create_dns_record: false
