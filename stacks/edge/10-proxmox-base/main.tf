@@ -10,7 +10,7 @@ module "proxmox_setup" {
 
 module "proxmox_sdn" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-proxmox-sdn?ref=main"
-  bridge = "vmbr0"
+  bridge = var.bridge
   zones  = local.sdn_zones
 }
 

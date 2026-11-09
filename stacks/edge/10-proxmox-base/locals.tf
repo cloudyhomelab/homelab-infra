@@ -10,4 +10,6 @@ locals {
   }
 
   sdn_zones = { for group, vnets in local.sdn_vnets : group => vnets if length(vnets) > 0 }
+
+  vlans = merge(values(local.ipam.vlan_groups)...)
 }
