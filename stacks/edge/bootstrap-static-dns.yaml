@@ -1,7 +1,8 @@
 ---
 # Static records in zones served by the DNS server: zone => name (relative to the zone) => record.
 # Written to the DNS server by 25-dns-records and, as IP addresses with their DNS name, to NetBox by
-# 35-netbox-addresses.
+# 35-netbox-addresses; addresses that global-data/ipam.yaml names as a gateway are left to
+# network/10-ipam there.
 # Each record takes `a` (list of IPv4 addresses).
 ip.cloudyhome.net:
   gateway:

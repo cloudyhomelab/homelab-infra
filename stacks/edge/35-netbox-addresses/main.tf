@@ -11,13 +11,16 @@ locals {
     [for prefix, config in local.ipam.prefixes : prefix if config.status == "active"],
   )
 
+  # network/10-ipam registers these; a second record for the same address would collide
+  gateways = flatten([for vlans in values(local.ipam.vlan_groups) : [for vlan in values(vlans) : vlan.gateway]])
+
   a_records = flatten([
     for zone, names in local.zones : [
       for name, record in names : [
         for address in record.a : {
           address  = address
           dns_name = "${name}.${trimsuffix(zone, ".")}"
-        }
+        } if !contains(local.gateways, address)
       ]
     ]
   ])

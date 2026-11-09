@@ -1,6 +1,9 @@
 locals {
   vms = yamldecode(file("${path.module}/../vms.yaml"))
 
+  # Keys of ../vms.yaml created here => settings with the domain defaults
+  vm = { for key in ["dns-secondary"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
+
   vm_defaults = {
     username     = var.vm_username
     user_id      = var.vm_user_id
@@ -8,16 +11,27 @@ locals {
     searchdomain = var.dns_zone
   }
 
-  # Keys of ../vms.yaml created here => module config
   vm_config = {
-    for key in ["dns-secondary"] : key => merge(
+    for key, vm in local.vm : key => merge(
       local.vm_defaults,
-      local.vms.defaults,
-      { name = key },
-      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "network"], field) },
-      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
+      { for field, value in vm : field => value if !contains(["image", "network"], field) },
+      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[vm.network] },
+      {
+        ip4_address_cidr = try(module.address[key].ip4_address_cidr, null)
+        gateway          = try(module.address[key].gateway, null)
+        dns_addresses    = try(module.address[key].dns_addresses, [])
+      },
     )
   }
+}
+
+module "address" {
+  source   = "../../../shared/modules/vm-address"
+  for_each = { for key, vm in local.vm : key => vm if !vm.dhcp }
+
+  network          = each.value.network
+  dns_name         = "${each.value.name}.${var.dns_zone}"
+  ip4_address_cidr = try(each.value.ip4_address_cidr, null)
 }
 
 data "terraform_remote_state" "proxmox_base" {

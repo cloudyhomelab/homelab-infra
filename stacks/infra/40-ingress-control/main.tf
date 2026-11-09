@@ -1,6 +1,9 @@
 locals {
   vms = yamldecode(file("${path.module}/../vms.yaml"))
 
+  # Keys of ../vms.yaml created here => settings with the domain defaults
+  vm = { for key in ["mgmt-ctl", "lab-ctl", "iot-ctl", "edge-ctl"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
+
   vm_defaults = {
     username     = var.vm_username
     user_id      = var.vm_user_id
@@ -9,27 +12,42 @@ locals {
     reverse_zone = var.reverse_zone
   }
 
-  # Keys of ../vms.yaml created here => module config; edge-ctl separate for its depends_on,
+  # Keys of local.vm => module config; edge-ctl separate for its depends_on,
   # which cannot point at sibling for_each instances
   vm_config = {
     for key in ["mgmt-ctl", "lab-ctl", "iot-ctl"] : key => merge(
       local.vm_defaults,
-      local.vms.defaults,
-      { name = key },
-      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "network"], field) },
-      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
+      { for field, value in local.vm[key] : field => value if !contains(["image", "network"], field) },
+      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
+      {
+        ip4_address_cidr = try(module.address[key].ip4_address_cidr, null)
+        gateway          = try(module.address[key].gateway, null)
+        dns_addresses    = try(module.address[key].dns_addresses, [])
+      },
     )
   }
 
   edge_vm_config = {
     for key in ["edge-ctl"] : key => merge(
       local.vm_defaults,
-      local.vms.defaults,
-      { name = key },
-      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "network"], field) },
-      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
+      { for field, value in local.vm[key] : field => value if !contains(["image", "network"], field) },
+      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
+      {
+        ip4_address_cidr = try(module.address[key].ip4_address_cidr, null)
+        gateway          = try(module.address[key].gateway, null)
+        dns_addresses    = try(module.address[key].dns_addresses, [])
+      },
     )
   }
+}
+
+module "address" {
+  source   = "../../../shared/modules/vm-address"
+  for_each = { for key, vm in local.vm : key => vm if !vm.dhcp }
+
+  network          = each.value.network
+  dns_name         = "${each.value.name}.${var.dns_zone}"
+  ip4_address_cidr = try(each.value.ip4_address_cidr, null)
 }
 
 data "terraform_remote_state" "proxmox_base" {

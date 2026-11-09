@@ -14,7 +14,7 @@ def storage_exports(catalog, vms, zone):
     catalog: the image catalog's `latest` output, keyed by <os>/<type>.
     vms: the domain's vms.yaml, {defaults, vms: key => {image, name?, dhcp, ip4_address_cidr?, ...}}.
     Returns [{app, dataset, recordsize?, hosts, images}] sorted by app and dataset, hosts as sorted
-    addresses of static VMs and FQDNs of the others, images as sorted image names.
+    addresses of VMs with an ip4_address_cidr and FQDNs of the others, images as sorted image names.
     """
     if not zone:
         raise AnsibleFilterError("zone is empty")
@@ -50,8 +50,9 @@ def storage_exports(catalog, vms, zone):
 
 
 def _host(key, vm, zone):
-    # A static VM is allowed by address: it may have no DNS record (e.g. the DNS servers themselves)
-    if not vm["dhcp"]:
+    # A pinned VM is allowed by address: it may have no DNS record (e.g. the DNS servers themselves).
+    # Any other is allowed by name, since NetBox allocates its address only when the VM is created.
+    if vm.get("ip4_address_cidr"):
         return vm["ip4_address_cidr"].split("/")[0]
     return f"{vm.get('name', key)}.{zone}"
 

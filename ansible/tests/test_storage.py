@@ -58,6 +58,12 @@ def test_dhcp_vm_is_allowed_by_its_name():
     assert storage_exports(CATALOG, vms, ZONE)[0]["hosts"] == ["renamed.lab.example"]
 
 
+def test_allocated_vm_is_allowed_by_its_name():
+    vms = domain({"key": {"image": "debian/app", "name": "renamed", "dhcp": False}})
+
+    assert storage_exports(CATALOG, vms, ZONE)[0]["hosts"] == ["renamed.lab.example"]
+
+
 def test_vm_settings_override_defaults():
     vms = domain(
         {"vm1": {"image": "debian/app", "ip4_address_cidr": "10.0.0.5/24"}, "vm2": {"image": "debian/app", "dhcp": True}},

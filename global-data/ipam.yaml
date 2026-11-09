@@ -6,7 +6,10 @@
 # roles: IP range role slug => name, description and mark_populated (true: NetBox treats the whole
 #   range as used and never offers its addresses as available).
 # vlan_groups: group => VLAN name => description, vid, sdn (true: create a Proxmox VNet; group and
-#   VLAN names must then be 2-8 alphanumeric characters), prefix (IPv4 CIDR) and ranges.
+#   VLAN names must then be 2-8 alphanumeric characters), prefix (IPv4 CIDR), gateway (address
+#   inside the prefix), dns (list of server addresses, each the gateway of some VLAN) and ranges.
+#   network/10-ipam registers the gateways and links them to the prefix as its gateway and
+#   dns_servers custom fields.
 # prefixes: prefixes outside any VLAN => description, status and ranges.
 # ranges: role slug => {start, end} addresses without mask, inside the prefix.
 roles:
@@ -26,6 +29,8 @@ vlan_groups:
       vid: 1
       sdn: false
       prefix: 10.88.0.0/24
+      gateway: 10.88.0.1
+      dns: [10.88.0.1]
       ranges:
         dhcp: { start: 10.88.0.101, end: 10.88.0.120 }
         static: { start: 10.88.0.150, end: 10.88.0.200 }
@@ -35,6 +40,8 @@ vlan_groups:
       vid: 13
       sdn: false
       prefix: 10.88.13.0/24
+      gateway: 10.88.13.1
+      dns: [10.88.13.1]
       ranges:
         dhcp: { start: 10.88.13.50, end: 10.88.13.200 }
     IoTNet:
@@ -42,6 +49,8 @@ vlan_groups:
       vid: 15
       sdn: true
       prefix: 10.88.15.0/24
+      gateway: 10.88.15.1
+      dns: [10.88.15.1]
       ranges:
         dhcp: { start: 10.88.15.5, end: 10.88.15.14 }
         static: { start: 10.88.15.100, end: 10.88.15.200 }
@@ -50,6 +59,8 @@ vlan_groups:
       vid: 16
       sdn: true
       prefix: 10.88.16.0/24
+      gateway: 10.88.16.1
+      dns: [10.88.16.1]
       ranges:
         dhcp: { start: 10.88.16.170, end: 10.88.16.200 }
         static: { start: 10.88.16.100, end: 10.88.16.150 }
@@ -59,6 +70,8 @@ vlan_groups:
       vid: 200
       sdn: true
       prefix: 10.88.200.0/24
+      gateway: 10.88.200.1
+      dns: [10.88.200.1]
       ranges:
         dhcp: { start: 10.88.200.101, end: 10.88.200.250 }
         static: { start: 10.88.200.50, end: 10.88.200.100 }
@@ -68,6 +81,8 @@ vlan_groups:
       vid: 14
       sdn: false
       prefix: 10.88.14.0/24
+      gateway: 10.88.14.1
+      dns: [10.88.14.1]
       ranges:
         dhcp: { start: 10.88.14.2, end: 10.88.14.254 }
   Work:
@@ -76,6 +91,8 @@ vlan_groups:
       vid: 100
       sdn: false
       prefix: 10.88.100.0/29
+      gateway: 10.88.100.1
+      dns: [10.88.100.1]
       ranges:
         dhcp: { start: 10.88.100.2, end: 10.88.100.6 }
 
