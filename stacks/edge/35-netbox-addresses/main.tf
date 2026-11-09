@@ -11,11 +11,10 @@ locals {
     [for prefix, config in local.ipam.prefixes : prefix if config.status == "active"],
   )
 
-  # CNAMEs carry no address of their own, so only A records reach NetBox
   a_records = flatten([
     for zone, names in local.zones : [
       for name, record in names : [
-        for address in try(record.a, []) : {
+        for address in record.a : {
           address  = address
           dns_name = "${name}.${trimsuffix(zone, ".")}"
         }
