@@ -1,0 +1,4 @@
+---
+# VM name => image catalog key (<os>/<type>)
+# Read by the VM stacks
+dns-primary: debian/debian-dns-primary

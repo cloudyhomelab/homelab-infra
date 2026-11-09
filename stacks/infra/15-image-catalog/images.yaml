@@ -1,6 +1,7 @@
 debian:
   - debian-arr-stack
   - debian-controlplane
+  - debian-dns-secondary
   - debian-edge
   - debian-iot-ingress-control
   - debian-lab-ingress-control

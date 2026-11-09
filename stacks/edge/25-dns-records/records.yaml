@@ -1,0 +1,36 @@
+---
+# Static records in zones served by the DNS server: zone => name (relative to the zone) => record.
+# A record takes `a` (list of IPv4 addresses), a CNAME takes `cname` (target FQDN).
+ip.cloudyhome.net:
+  gateway:
+    a: [10.88.0.1]
+  sw1:
+    a: [10.88.0.2]
+  ap1:
+    a: [10.88.0.10]
+  uos:
+    a: [10.88.0.11]
+  pve1:
+    a: [10.88.0.20]
+  pve2:
+    a: [10.88.0.21]
+  pve3:
+    a: [10.88.0.22]
+  pve-lab-1:
+    a: [10.88.0.31]
+  pve-infra-1:
+    a: [10.88.0.41]
+  durin:
+    a: [10.88.0.50]
+  moria:
+    a: [10.88.0.51]
+  printer01:
+    a: [10.88.13.2]
+  wakanda:
+    a: [10.88.0.100]
+  zigbee01:
+    a: [10.88.15.2]
+  zigbee02:
+    a: [10.88.15.3]
+  caserver:
+    a: [10.88.16.163]

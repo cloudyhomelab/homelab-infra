@@ -54,3 +54,24 @@ variable "porkbun_secret_api_key" {
   type        = string
   sensitive   = true
 }
+
+# tflint-ignore: terraform_unused_declarations
+variable "dns_zone" {
+  description = "DNS zone the VMs live in, used as their search domain."
+  type        = string
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "dns_server" {
+  description = "DNS server that takes the RFC 2136 updates."
+  type        = string
+  nullable    = false
+}
+
+# tflint-ignore: terraform_unused_declarations
+variable "reverse_zone" {
+  description = "in-addr.arpa zone that holds the PTR records of the VM addresses."
+  type        = string
+  nullable    = false
+}

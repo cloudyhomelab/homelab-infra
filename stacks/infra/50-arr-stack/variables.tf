@@ -28,7 +28,3 @@ variable "vm_username" {
 variable "vm_user_id" {
   type = number
 }
-
-variable "dns_zone" {
-  type = string
-}

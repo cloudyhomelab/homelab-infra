@@ -1,2 +1,2 @@
 debian:
-  - debian-controlplane
+  - debian-dns-primary
