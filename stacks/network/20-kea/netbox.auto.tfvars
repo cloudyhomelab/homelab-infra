@@ -1,1 +1,1 @@
-../netbox.auto.tfvars
+../../netbox.auto.tfvars

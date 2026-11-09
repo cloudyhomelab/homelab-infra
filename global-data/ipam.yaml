@@ -1,6 +1,7 @@
 ---
 # IPAM content: written to NetBox by network/10-ipam; VLANs marked `sdn` become Proxmox SDN VNets
-# in each domain's 10-proxmox-base (zone = VLAN group).
+# in each domain's 10-proxmox-base (zone = VLAN group); active prefixes give the masks of the
+# addresses edge/35-netbox-addresses registers.
 # Every key is required.
 # roles: IP range role slug => name, description and mark_populated (true: NetBox treats the whole
 #   range as used and never offers its addresses as available).
