@@ -1,0 +1,50 @@
+---
+# NetBox IPAM content.
+# vlan_groups: group => VLAN name => vid, optional prefix (IPv4 CIDR), description and dhcp.
+# prefixes: prefixes outside any VLAN => optional status (default active), description and dhcp.
+# dhcp: the prefix's DHCP pool as {start, end} addresses without mask.
+vlan_groups:
+  Mgmt:
+    MgmtNet:
+      description: Management LAN
+      vid: 1
+      prefix: 10.88.0.0/24
+      dhcp: { start: 10.88.0.100, end: 10.88.0.200 }
+  Lab:
+    IoTSecNet:
+      description: IoT without Internet Access
+      vid: 13
+      prefix: 10.88.13.0/24
+      dhcp: { start: 10.88.13.50, end: 10.88.13.200 }
+    IoTNet:
+      description: IoT with Internet Access
+      vid: 15
+      prefix: 10.88.15.0/28
+      dhcp: { start: 10.88.15.5, end: 10.88.15.14 }
+    LabNet:
+      description: Default VLAN for all VMs
+      vid: 16
+      prefix: 10.88.16.0/24
+      dhcp: { start: 10.88.16.100, end: 10.88.16.200 }
+  VPN:
+    IndiaNet:
+      description: The only egress is via the VPN
+      vid: 200
+      prefix: 10.88.200.0/24
+      dhcp: { start: 10.88.200.51, end: 10.88.200.250 }
+  Home:
+    Wifi:
+      description: For trusted personal devices
+      vid: 14
+      prefix: 10.88.14.0/24
+      dhcp: { start: 10.88.14.2, end: 10.88.14.254 }
+  Work:
+    WorkNet:
+      description: For work devices
+      vid: 100
+      prefix: 10.88.100.0/29
+      dhcp: { start: 10.88.100.2, end: 10.88.100.6 }
+
+prefixes:
+  10.88.0.0/16:
+    status: container

@@ -1,7 +1,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
 # Apply order across failure domains
-domains := "level0 edge infra apps"
+domains := "level0 edge network infra apps"
 
 # One state bucket per domain: <prefix><domain>
 state_bucket_prefix := "tofu-state-"

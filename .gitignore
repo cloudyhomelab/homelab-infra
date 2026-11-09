@@ -5,6 +5,7 @@
 *.tfvars
 !stacks/**/domain.auto.tfvars
 !stacks/**/global.auto.tfvars
+!stacks/**/netbox.auto.tfvars
 crash.log
 backend_override.tf
 .envrc.local
