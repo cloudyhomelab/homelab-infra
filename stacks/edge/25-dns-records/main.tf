@@ -7,10 +7,9 @@ locals {
   records = merge([
     for zone, names in local.zones : {
       for name, record in names : "${name}.${trimsuffix(zone, ".")}" => {
-        zone  = "${trimsuffix(zone, ".")}."
-        name  = name
-        a     = try(record.a, null)
-        cname = try(record.cname, null)
+        zone = "${trimsuffix(zone, ".")}."
+        name = name
+        a    = record.a
       }
     }
   ]...)
@@ -18,7 +17,7 @@ locals {
 
 module "a_record" {
   source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-dns-record?ref=main"
-  for_each = { for key, record in local.records : key => record if record.a != null }
+  for_each = local.records
 
   config = {
     name         = each.value.name
@@ -27,13 +26,4 @@ module "a_record" {
     reverse_zone = var.reverse_zone
     ttl          = local.ttl
   }
-}
-
-resource "dns_cname_record" "this" {
-  for_each = { for key, record in local.records : key => record if record.cname != null }
-
-  zone  = each.value.zone
-  name  = each.value.name
-  cname = "${trimsuffix(each.value.cname, ".")}."
-  ttl   = local.ttl
 }
