@@ -15,3 +15,11 @@ vms:
     gateway: 10.88.16.1
     dns_addresses: [10.88.16.1]
     create_dns_record: false
+
+  netbox:
+    image: debian/debian-netbox
+    bridge: LabNet
+    dhcp: false
+    ip4_address_cidr: 10.88.16.10/24
+    gateway: 10.88.16.1
+    dns_addresses: [10.88.16.1]
