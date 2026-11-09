@@ -16,13 +16,17 @@ locals {
   ]...)
 }
 
-resource "dns_a_record_set" "this" {
+module "a_record" {
+  source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-dns-record?ref=main"
   for_each = { for key, record in local.records : key => record if record.a != null }
 
-  zone      = each.value.zone
-  name      = each.value.name
-  addresses = each.value.a
-  ttl       = local.ttl
+  config = {
+    name         = each.value.name
+    zone         = each.value.zone
+    ipv4         = one(each.value.a)
+    reverse_zone = var.reverse_zone
+    ttl          = local.ttl
+  }
 }
 
 resource "dns_cname_record" "this" {
