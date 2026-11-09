@@ -20,6 +20,14 @@ terraform {
       source  = "hashicorp/dns"
       version = "3.6.2"
     }
+    netbox = {
+      source  = "e-breuninger/netbox"
+      version = "6.0.0"
+    }
+    opnsense = {
+      source  = "browningluke/opnsense"
+      version = "0.26.0"
+    }
   }
 
   # The AWS SDK reads AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY (from the domain's SOPS file) from
