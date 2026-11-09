@@ -10,7 +10,7 @@ locals {
         vid         = vlan.vid
         prefix      = try(vlan.prefix, null)
         description = try(vlan.description, null)
-        dhcp        = try(vlan.dhcp, null)
+        ranges      = try(vlan.ranges, {})
       }
     }
   ]...)
@@ -20,7 +20,7 @@ locals {
       for key, vlan in local.vlans : vlan.prefix => {
         status      = "active"
         description = vlan.description
-        dhcp        = vlan.dhcp
+        ranges      = vlan.ranges
         vlan        = key
       } if vlan.prefix != null
     },
@@ -28,13 +28,22 @@ locals {
       for prefix, config in local.ipam.prefixes : prefix => {
         status      = try(config.status, "active")
         description = try(config.description, null)
-        dhcp        = try(config.dhcp, null)
+        ranges      = try(config.ranges, {})
         vlan        = null
       }
     },
   )
 
-  dhcp_pools = { for prefix, config in local.prefixes : prefix => config.dhcp if config.dhcp != null }
+  ip_ranges = merge([
+    for prefix, config in local.prefixes : {
+      for role, range in config.ranges : "${prefix}:${role}" => {
+        prefix = prefix
+        role   = role
+        start  = range.start
+        end    = range.end
+      }
+    }
+  ]...)
 }
 
 resource "netbox_vlan_group" "this" {
@@ -62,26 +71,27 @@ resource "netbox_prefix" "this" {
   vlan_id     = each.value.vlan == null ? null : netbox_vlan.this[each.value.vlan].id
 }
 
-resource "netbox_ipam_role" "dhcp" {
-  name = "DHCP"
-  # 20-kea selects the DHCP pools by this slug
-  slug = "dhcp"
+resource "netbox_ipam_role" "this" {
+  for_each = local.ipam.roles
+
+  name        = each.value.name
+  slug        = each.key
+  description = try(each.value.description, null)
 }
 
-resource "netbox_ip_range" "dhcp" {
-  for_each = local.dhcp_pools
+resource "netbox_ip_range" "this" {
+  for_each = local.ip_ranges
 
-  start_address = "${each.value.start}/${split("/", each.key)[1]}"
-  end_address   = "${each.value.end}/${split("/", each.key)[1]}"
-  status        = "active"
-  role_id       = netbox_ipam_role.dhcp.id
-  # Keeps "next available IP" from handing out leased addresses as static ones
-  mark_populated = true
+  start_address  = "${each.value.start}/${split("/", each.value.prefix)[1]}"
+  end_address    = "${each.value.end}/${split("/", each.value.prefix)[1]}"
+  status         = "active"
+  role_id        = netbox_ipam_role.this[each.value.role].id
+  mark_populated = local.ipam.roles[each.value.role].mark_populated
 
   lifecycle {
     precondition {
-      condition     = cidrcontains(each.key, each.value.start) && cidrcontains(each.key, each.value.end)
-      error_message = "DHCP pool ${each.value.start}-${each.value.end} lies outside ${each.key}."
+      condition     = cidrcontains(each.value.prefix, each.value.start) && cidrcontains(each.value.prefix, each.value.end)
+      error_message = "Range ${each.value.start}-${each.value.end} (${each.value.role}) lies outside ${each.value.prefix}."
     }
   }
 }

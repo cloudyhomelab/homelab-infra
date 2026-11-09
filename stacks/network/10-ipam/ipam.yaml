@@ -1,49 +1,72 @@
 ---
 # NetBox IPAM content.
-# vlan_groups: group => VLAN name => vid, optional prefix (IPv4 CIDR), description and dhcp.
-# prefixes: prefixes outside any VLAN => optional status (default active), description and dhcp.
-# dhcp: the prefix's DHCP pool as {start, end} addresses without mask.
+# roles: IP range role slug => name, optional description, and mark_populated (true: NetBox treats
+#   the whole range as used and never offers its addresses as available).
+# vlan_groups: group => VLAN name => vid, optional prefix (IPv4 CIDR), description and ranges.
+# prefixes: prefixes outside any VLAN => optional status (default active), description and ranges.
+# ranges: role slug => {start, end} addresses without mask, inside the prefix.
+roles:
+  # Pools Kea leases from; network/20-kea reads this slug
+  dhcp:
+    name: DHCP
+    mark_populated: true
+  # Static addresses OpenTofu allocates from
+  static:
+    name: Static
+    mark_populated: false
+
 vlan_groups:
   Mgmt:
     MgmtNet:
       description: Management LAN
       vid: 1
       prefix: 10.88.0.0/24
-      dhcp: { start: 10.88.0.100, end: 10.88.0.200 }
+      ranges:
+        dhcp: { start: 10.88.0.100, end: 10.88.0.120 }
+        static: { start: 10.88.0.150, end: 10.88.0.200 }
   Lab:
     IoTSecNet:
       description: IoT without Internet Access
       vid: 13
       prefix: 10.88.13.0/24
-      dhcp: { start: 10.88.13.50, end: 10.88.13.200 }
+      ranges:
+        dhcp: { start: 10.88.13.50, end: 10.88.13.200 }
     IoTNet:
       description: IoT with Internet Access
       vid: 15
-      prefix: 10.88.15.0/28
-      dhcp: { start: 10.88.15.5, end: 10.88.15.14 }
+      prefix: 10.88.15.0/24
+      ranges:
+        dhcp: { start: 10.88.15.5, end: 10.88.15.14 }
+        static: { start: 10.88.15.100, end: 10.88.15.200 }
     LabNet:
       description: Default VLAN for all VMs
       vid: 16
       prefix: 10.88.16.0/24
-      dhcp: { start: 10.88.16.100, end: 10.88.16.200 }
+      ranges:
+        dhcp: { start: 10.88.16.151, end: 10.88.16.200 }
+        static: { start: 10.88.16.100, end: 10.88.16.150 }
   VPN:
     IndiaNet:
       description: The only egress is via the VPN
       vid: 200
       prefix: 10.88.200.0/24
-      dhcp: { start: 10.88.200.51, end: 10.88.200.250 }
+      ranges:
+        dhcp: { start: 10.88.200.101, end: 10.88.200.250 }
+        static: { start: 10.88.200.50, end: 10.88.200.100 }
   Home:
     Wifi:
       description: For trusted personal devices
       vid: 14
       prefix: 10.88.14.0/24
-      dhcp: { start: 10.88.14.2, end: 10.88.14.254 }
+      ranges:
+        dhcp: { start: 10.88.14.2, end: 10.88.14.254 }
   Work:
     WorkNet:
       description: For work devices
       vid: 100
       prefix: 10.88.100.0/29
-      dhcp: { start: 10.88.100.2, end: 10.88.100.6 }
+      ranges:
+        dhcp: { start: 10.88.100.2, end: 10.88.100.6 }
 
 prefixes:
   10.88.0.0/16:
