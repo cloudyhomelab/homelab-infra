@@ -7,3 +7,4 @@ debian:
   - debian-lab-ingress-control
   - debian-management-ingress-control
   - debian-observability
+  - debian-runner
