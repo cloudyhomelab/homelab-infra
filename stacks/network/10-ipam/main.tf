@@ -1,5 +1,5 @@
 locals {
-  ipam = yamldecode(file("${path.module}/ipam.yaml"))
+  ipam = yamldecode(file("${path.module}/../../../global-data/ipam.yaml"))
 
   # Keyed group/name: NetBox allows the same VLAN name in different groups
   vlans = merge([

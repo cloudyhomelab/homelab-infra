@@ -11,7 +11,7 @@ module "proxmox_setup" {
 module "proxmox_sdn" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-proxmox-sdn?ref=main"
   bridge = "vmbr0"
-  zones  = yamldecode(file("${path.module}/sdn.yaml"))
+  zones  = local.sdn_zones
 }
 
 import {

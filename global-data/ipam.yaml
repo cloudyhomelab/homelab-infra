@@ -1,8 +1,10 @@
 ---
-# NetBox IPAM content.
+# IPAM content: written to NetBox by network/10-ipam; VLANs marked `sdn` become Proxmox SDN VNets
+# in each domain's 10-proxmox-base (zone = VLAN group).
 # roles: IP range role slug => name, optional description, and mark_populated (true: NetBox treats
 #   the whole range as used and never offers its addresses as available).
-# vlan_groups: group => VLAN name => vid, optional prefix (IPv4 CIDR), description and ranges.
+# vlan_groups: group => VLAN name => vid, sdn (true: create a Proxmox VNet; group and VLAN names
+#   must then be 2-8 alphanumeric characters), optional prefix (IPv4 CIDR), description and ranges.
 # prefixes: prefixes outside any VLAN => optional status (default active), description and ranges.
 # ranges: role slug => {start, end} addresses without mask, inside the prefix.
 roles:
@@ -20,6 +22,7 @@ vlan_groups:
     MgmtNet:
       description: Management LAN
       vid: 1
+      sdn: false
       prefix: 10.88.0.0/24
       ranges:
         dhcp: { start: 10.88.0.101, end: 10.88.0.120 }
@@ -28,12 +31,14 @@ vlan_groups:
     IoTSecNet:
       description: IoT without Internet Access
       vid: 13
+      sdn: false
       prefix: 10.88.13.0/24
       ranges:
         dhcp: { start: 10.88.13.50, end: 10.88.13.200 }
     IoTNet:
       description: IoT with Internet Access
       vid: 15
+      sdn: true
       prefix: 10.88.15.0/24
       ranges:
         dhcp: { start: 10.88.15.5, end: 10.88.15.14 }
@@ -41,6 +46,7 @@ vlan_groups:
     LabNet:
       description: Default VLAN for all VMs
       vid: 16
+      sdn: true
       prefix: 10.88.16.0/24
       ranges:
         dhcp: { start: 10.88.16.170, end: 10.88.16.200 }
@@ -49,6 +55,7 @@ vlan_groups:
     IndiaNet:
       description: The only egress is via the VPN
       vid: 200
+      sdn: true
       prefix: 10.88.200.0/24
       ranges:
         dhcp: { start: 10.88.200.101, end: 10.88.200.250 }
@@ -57,6 +64,7 @@ vlan_groups:
     Wifi:
       description: For trusted personal devices
       vid: 14
+      sdn: false
       prefix: 10.88.14.0/24
       ranges:
         dhcp: { start: 10.88.14.2, end: 10.88.14.254 }
@@ -64,6 +72,7 @@ vlan_groups:
     WorkNet:
       description: For work devices
       vid: 100
+      sdn: false
       prefix: 10.88.100.0/29
       ranges:
         dhcp: { start: 10.88.100.2, end: 10.88.100.6 }
