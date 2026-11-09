@@ -12,18 +12,21 @@ def storage_exports(catalog, vms, zone):
     """One export per (app, dataset) named by the images of the given VMs.
 
     catalog: the image catalog's `latest` output, keyed by <os>/<type>.
-    vms: VM name => catalog key.
-    Returns [{app, dataset, recordsize?, hosts, images}] sorted by app and dataset, hosts as sorted FQDNs,
-    images as sorted image names.
+    vms: the domain's vms.yaml, {defaults, vms: key => {image, name?, dhcp, ip4_address_cidr?, ...}}.
+    Returns [{app, dataset, recordsize?, hosts, images}] sorted by app and dataset, hosts as sorted
+    addresses of static VMs and FQDNs of the others, images as sorted image names.
     """
     if not zone:
         raise AnsibleFilterError("zone is empty")
 
     exports = {}
     first_image = {}
-    for vm, image in vms.items():
+    for vm_key, settings in vms["vms"].items():
+        vm = {**vms.get("defaults", {}), **settings}
+        host = _host(vm_key, vm, zone)
+        image = vm["image"]
         if image not in catalog:
-            raise AnsibleFilterError(f"VM {vm}: image {image} is not in the catalog")
+            raise AnsibleFilterError(f"VM {vm_key}: image {image} is not in the catalog")
         for entry in catalog[image].get("storage") or []:
             key = (entry["app"], entry["dataset"])
             for segment in key:
@@ -40,10 +43,17 @@ def storage_exports(catalog, vms, zone):
                     f"{key[0]}/{key[1]}: {image} and {first_image[key]} want different recordsize"
                 )
             first_image.setdefault(key, image)
-            known["hosts"] = sorted({*known["hosts"], f"{vm}.{zone}"})
+            known["hosts"] = sorted({*known["hosts"], host})
             known["images"] = sorted({*known["images"], catalog[image]["type"]})
 
     return [exports[key] for key in sorted(exports)]
+
+
+def _host(key, vm, zone):
+    # A static VM is allowed by address: it may have no DNS record (e.g. the DNS servers themselves)
+    if not vm["dhcp"]:
+        return vm["ip4_address_cidr"].split("/")[0]
+    return f"{vm.get('name', key)}.{zone}"
 
 
 def recordsize_update(dataset_query, recordsize):
