@@ -2,7 +2,7 @@ locals {
   # Matches the TTL the VM module gives its own records
   ttl = 300
 
-  zones = yamldecode(file("${path.module}/records.yaml"))
+  zones = yamldecode(file("${path.module}/../../../global-data/bootstrap-static-dns.yaml"))
 
   records = merge([
     for zone, names in local.zones : {

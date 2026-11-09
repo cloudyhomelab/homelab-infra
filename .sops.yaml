@@ -8,6 +8,8 @@ creation_rules:
     age: *primary
   - path_regex: ^secrets/edge\.sops\.yaml$
     age: *primary
+  - path_regex: ^secrets/network\.sops\.yaml$
+    age: *primary
   - path_regex: ^secrets/infra\.sops\.yaml$
     age: *primary
   - path_regex: ^secrets/apps\.sops\.yaml$

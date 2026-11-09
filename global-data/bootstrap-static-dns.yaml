@@ -1,5 +1,7 @@
 ---
 # Static records in zones served by the DNS server: zone => name (relative to the zone) => record.
+# Written to the DNS server by edge/25-dns-records and, as IP addresses with their DNS name, to NetBox
+# by network/30-static-dns.
 # A record takes `a` (list of IPv4 addresses), a CNAME takes `cname` (target FQDN).
 ip.cloudyhome.net:
   gateway:
