@@ -1,7 +1,3 @@
-variable "dns_server" {
-  type = string
-}
-
 variable "dns_tsig_key_name" {
   type = string
 }
