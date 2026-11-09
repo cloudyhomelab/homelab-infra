@@ -1,20 +1,21 @@
 ---
 # IPAM content: written to NetBox by network/10-ipam; VLANs marked `sdn` become Proxmox SDN VNets
 # in each domain's 10-proxmox-base (zone = VLAN group).
-# roles: IP range role slug => name, optional description, and mark_populated (true: NetBox treats
-#   the whole range as used and never offers its addresses as available).
-# vlan_groups: group => VLAN name => vid, sdn (true: create a Proxmox VNet; group and VLAN names
-#   must then be 2-8 alphanumeric characters), optional prefix (IPv4 CIDR), description and ranges.
-# prefixes: prefixes outside any VLAN => optional status (default active), description and ranges.
+# Every key is required.
+# roles: IP range role slug => name, description and mark_populated (true: NetBox treats the whole
+#   range as used and never offers its addresses as available).
+# vlan_groups: group => VLAN name => description, vid, sdn (true: create a Proxmox VNet; group and
+#   VLAN names must then be 2-8 alphanumeric characters), prefix (IPv4 CIDR) and ranges.
+# prefixes: prefixes outside any VLAN => description, status and ranges.
 # ranges: role slug => {start, end} addresses without mask, inside the prefix.
 roles:
-  # Pools Kea leases from; network/20-kea reads this slug
   dhcp:
     name: DHCP
+    description: Pools Kea leases from; network/20-kea reads this slug
     mark_populated: true
-  # Static addresses OpenTofu allocates from
   static:
     name: Static
+    description: Static addresses OpenTofu allocates from
     mark_populated: false
 
 vlan_groups:
@@ -79,4 +80,6 @@ vlan_groups:
 
 prefixes:
   10.88.0.0/16:
+    description: Lab data center
     status: container
+    ranges: {}
