@@ -15,9 +15,15 @@ locals {
       local.vm_defaults,
       local.vms.defaults,
       { name = key },
-      { for field, value in local.vms.vms[key] : field => value if field != "image" },
+      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "network"], field) },
+      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
     )
   }
+}
+
+data "terraform_remote_state" "proxmox_base" {
+  backend = "s3"
+  config  = merge(local.state_backend, { key = "10-proxmox-base.tfstate" })
 }
 
 data "terraform_remote_state" "image_catalog" {
