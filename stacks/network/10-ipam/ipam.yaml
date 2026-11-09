@@ -22,7 +22,7 @@ vlan_groups:
       vid: 1
       prefix: 10.88.0.0/24
       ranges:
-        dhcp: { start: 10.88.0.100, end: 10.88.0.120 }
+        dhcp: { start: 10.88.0.101, end: 10.88.0.120 }
         static: { start: 10.88.0.150, end: 10.88.0.200 }
   Lab:
     IoTSecNet:
@@ -43,7 +43,7 @@ vlan_groups:
       vid: 16
       prefix: 10.88.16.0/24
       ranges:
-        dhcp: { start: 10.88.16.151, end: 10.88.16.200 }
+        dhcp: { start: 10.88.16.170, end: 10.88.16.200 }
         static: { start: 10.88.16.100, end: 10.88.16.150 }
   VPN:
     IndiaNet:
