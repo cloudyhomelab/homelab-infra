@@ -13,7 +13,7 @@ It runs after the image catalog and before the VM stacks.
 
 - `latest` output of `15-image-catalog`: each image's `storage` list, published by the image build as `{app, dataset, recordsize?}`.
 - `../vms.yaml`: VM name to image; the VM stacks read their image from the same file.
-- `TF_VAR_dns_zone` from the domain's secrets, to form the VM hostnames.
+- `dns_zone` from the inventory, to form the VM hostnames.
 
 ## Layout and access
 

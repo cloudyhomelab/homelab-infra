@@ -6,7 +6,7 @@
     domain: "{{ playbook_dir | dirname | basename }}"
     app_data_root: "{{ truenas_pool }}/cloudyhome_app_data"
     vms: "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../vms.yaml') | from_yaml }}"
-    zone: "{{ lookup('ansible.builtin.env', 'TF_VAR_dns_zone') }}"
+    zone: "{{ dns_zone }}"
 
   tasks:
     - name: Read the image catalog
