@@ -1,5 +1,6 @@
 ---
-# Every VM of the domain. Read by the VM stacks, which pick theirs by key.
+# Every VM of the domain. Read by the VM stacks, which pick theirs by key, and by 35-netbox-addresses,
+# which writes the static addresses to NetBox.
 # defaults: config fields every VM gets unless it sets its own.
 # vms: key => image (catalog key <os>/<type>) plus the module's config fields; name defaults to the key.
 defaults:

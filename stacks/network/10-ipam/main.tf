@@ -1,5 +1,5 @@
 locals {
-  ipam = yamldecode(file("${path.module}/ipam.yaml"))
+  ipam = yamldecode(file("${path.module}/../../../global-data/ipam.yaml"))
 
   # Keyed group/name: NetBox allows the same VLAN name in different groups
   vlans = merge([
@@ -8,9 +8,9 @@ locals {
         group       = group
         name        = name
         vid         = vlan.vid
-        prefix      = try(vlan.prefix, null)
-        description = try(vlan.description, null)
-        ranges      = try(vlan.ranges, {})
+        prefix      = vlan.prefix
+        description = vlan.description
+        ranges      = vlan.ranges
       }
     }
   ]...)
@@ -26,9 +26,9 @@ locals {
     },
     {
       for prefix, config in local.ipam.prefixes : prefix => {
-        status      = try(config.status, "active")
-        description = try(config.description, null)
-        ranges      = try(config.ranges, {})
+        status      = config.status
+        description = config.description
+        ranges      = config.ranges
         vlan        = null
       }
     },
@@ -76,7 +76,7 @@ resource "netbox_ipam_role" "this" {
 
   name        = each.value.name
   slug        = each.key
-  description = try(each.value.description, null)
+  description = each.value.description
 }
 
 resource "netbox_ip_range" "this" {

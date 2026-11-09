@@ -1,7 +1,7 @@
 ---
 # Static records in zones served by the DNS server: zone => name (relative to the zone) => record.
-# Written to the DNS server by edge/25-dns-records and, as IP addresses with their DNS name, to NetBox
-# by network/30-static-dns.
+# Written to the DNS server by 25-dns-records and, as IP addresses with their DNS name, to NetBox by
+# 35-netbox-addresses.
 # A record takes `a` (list of IPv4 addresses), a CNAME takes `cname` (target FQDN).
 ip.cloudyhome.net:
   gateway:
@@ -35,4 +35,4 @@ ip.cloudyhome.net:
   zigbee02:
     a: [10.88.15.3]
   caserver:
-    a: [10.88.16.163]
+    a: [10.88.16.9]
