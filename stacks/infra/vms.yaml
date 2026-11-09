@@ -9,3 +9,4 @@ iot-ctl: debian/debian-iot-ingress-control
 edge-ctl: debian/debian-edge
 arr-stack: debian/debian-arr-stack
 dns-secondary: debian/debian-dns-secondary
+runner: debian/debian-runner

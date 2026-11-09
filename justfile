@@ -103,6 +103,33 @@ destroy stack *args:
     [[ "$(just _kind {{ stack }})" == tofu ]] || { echo "only tofu stacks can be destroyed: {{ stack }}" >&2; exit 1; }
     just tofu {{ stack }} destroy {{ args }}
 
+# Rename a tofu stack within its domain, copying its state to the new key; the old state object stays in the bucket
+mv-stack stack name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    domain="{{ stack }}"
+    domain="${domain%%/*}"
+    old="{{ stack }}"
+    old="${old#*/}"
+    [[ "{{ name }}" != */* ]] || { echo "new name is a directory inside the domain, not a path: {{ name }}" >&2; exit 1; }
+    [[ "$(just _kind {{ stack }})" == tofu ]] || { echo "only tofu stacks can be moved: {{ stack }}" >&2; exit 1; }
+    [[ ! -e "stacks/$domain/{{ name }}" ]] || { echo "already exists: $domain/{{ name }}" >&2; exit 1; }
+    # Other stacks read state by key and playbooks call stacks by path; those would silently break
+    refs="$( {
+      grep -rnF --exclude-dir=.terraform -e "$old.tfstate" "stacks/$domain" || true
+      grep -rnF --exclude-dir=.terraform --exclude-dir=collections -e "/$old" stacks ansible scripts justfile || true
+    } | grep -v "^stacks/{{ stack }}/" | sort -u || true )"
+    if [[ -n "$refs" ]]; then
+      echo "still referenced elsewhere, update these first:" >&2
+      echo "$refs" >&2
+      exit 1
+    fi
+    # Init under the old key first so -migrate-state knows where to copy from
+    just tofu {{ stack }} init -input=false
+    mv "stacks/{{ stack }}" "stacks/$domain/{{ name }}"
+    just tofu "$domain/{{ name }}" init -migrate-state
+    just tofu "$domain/{{ name }}" plan -detailed-exitcode
+
 # Initialise every stack in a domain
 init-domain domain:
     #!/usr/bin/env bash
