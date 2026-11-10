@@ -52,7 +52,7 @@ vlan_groups:
       gateway: 10.88.15.1
       dns: [10.88.15.1]
       ranges:
-        dhcp: { start: 10.88.15.5, end: 10.88.15.14 }
+        dhcp: { start: 10.88.15.50, end: 10.88.15.99 }
         static: { start: 10.88.15.100, end: 10.88.15.200 }
     LabNet:
       description: Default VLAN for all VMs
