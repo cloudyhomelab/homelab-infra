@@ -10,12 +10,14 @@ locals {
 }
 
 module "address" {
-  source   = "../../../shared/modules/vm-address"
+  source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-netbox-ip-address?ref=main"
   for_each = local.vm
 
-  network          = each.value.network
-  dns_name         = "${each.value.name}.${var.dns_zone}"
-  ip4_address_cidr = try(each.value.ip4_address_cidr, null)
+  config = {
+    network          = each.value.network
+    dns_name         = "${each.value.name}.${var.dns_zone}"
+    ip4_address_cidr = try(each.value.ip4_address_cidr, null)
+  }
 }
 
 module "dns_record" {
