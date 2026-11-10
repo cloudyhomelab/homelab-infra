@@ -1,8 +1,4 @@
 ---
-all:
-  vars:
-    dns_zone: ip.cloudyhome.net
-
 truenas:
   hosts:
     moria.ip.cloudyhome.net:

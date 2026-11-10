@@ -6,7 +6,6 @@
     domain: "{{ playbook_dir | dirname | basename }}"
     app_data_root: "{{ truenas_pool }}/cloudyhome_app_data"
     vms: "{{ lookup('ansible.builtin.file', playbook_dir ~ '/../vms.yaml') | from_yaml }}"
-    zone: "{{ dns_zone }}"
 
   tasks:
     - name: Read the image catalog
@@ -17,9 +16,18 @@
       check_mode: false
       register: catalog
 
+    - name: Read the reserved VM addresses
+      ansible.builtin.command:
+        argv: [just, tofu, "{{ domain }}/16-vm-addresses", output, -json, addresses]
+      delegate_to: localhost
+      changed_when: false
+      check_mode: false
+      register: reserved
+      when: (playbook_dir ~ '/../16-vm-addresses') is directory
+
     - name: Work out the exports
       ansible.builtin.set_fact:
-        exports: "{{ catalog.stdout | from_json | storage_exports(vms, zone) }}"
+        exports: "{{ catalog.stdout | from_json | storage_exports(vms, reserved.stdout | default('{}') | from_json) }}"
 
     - name: Read current datasets
       ansible.builtin.command:

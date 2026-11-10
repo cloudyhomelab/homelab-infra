@@ -4,6 +4,8 @@ locals {
   # Keys of ../vms.yaml created here => settings with the domain defaults
   vm = { for key in ["mgmt-ctl", "lab-ctl", "iot-ctl", "edge-ctl"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
 
+  addresses = data.terraform_remote_state.vm_addresses.outputs.addresses
+
   vm_defaults = {
     username     = var.vm_username
     user_id      = var.vm_user_id
@@ -20,9 +22,11 @@ locals {
       { for field, value in local.vm[key] : field => value if !contains(["image", "network"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
       {
-        ip4_address_cidr = try(module.address[key].ip4_address_cidr, null)
-        gateway          = try(module.address[key].gateway, null)
-        dns_addresses    = try(module.address[key].dns_addresses, [])
+        # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
+        create_dns_record = local.vm[key].dhcp && try(local.vm[key].create_dns_record, true)
+        ip4_address_cidr  = local.vm[key].dhcp ? null : local.addresses[key].ip4_address_cidr
+        gateway           = local.vm[key].dhcp ? null : local.addresses[key].gateway
+        dns_addresses     = local.vm[key].dhcp ? [] : local.addresses[key].dns_addresses
       },
     )
   }
@@ -33,21 +37,19 @@ locals {
       { for field, value in local.vm[key] : field => value if !contains(["image", "network"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
       {
-        ip4_address_cidr = try(module.address[key].ip4_address_cidr, null)
-        gateway          = try(module.address[key].gateway, null)
-        dns_addresses    = try(module.address[key].dns_addresses, [])
+        # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
+        create_dns_record = local.vm[key].dhcp && try(local.vm[key].create_dns_record, true)
+        ip4_address_cidr  = local.vm[key].dhcp ? null : local.addresses[key].ip4_address_cidr
+        gateway           = local.vm[key].dhcp ? null : local.addresses[key].gateway
+        dns_addresses     = local.vm[key].dhcp ? [] : local.addresses[key].dns_addresses
       },
     )
   }
 }
 
-module "address" {
-  source   = "../../../shared/modules/vm-address"
-  for_each = { for key, vm in local.vm : key => vm if !vm.dhcp }
-
-  network          = each.value.network
-  dns_name         = "${each.value.name}.${var.dns_zone}"
-  ip4_address_cidr = try(each.value.ip4_address_cidr, null)
+data "terraform_remote_state" "vm_addresses" {
+  backend = "s3"
+  config  = merge(local.state_backend, { key = "16-vm-addresses.tfstate" })
 }
 
 data "terraform_remote_state" "proxmox_base" {
