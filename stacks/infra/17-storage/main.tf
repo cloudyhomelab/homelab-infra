@@ -16,7 +16,7 @@ data "terraform_remote_state" "vm_addresses" {
 }
 
 module "storage" {
-  source = "../../../shared/modules/cloudyhome-truenas-app-storage"
+  source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-truenas-app-storage?ref=main"
 
   root   = var.truenas_app_data_root
   images = data.terraform_remote_state.image_catalog.outputs.latest
