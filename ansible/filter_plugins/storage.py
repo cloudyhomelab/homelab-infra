@@ -8,26 +8,28 @@ from ansible.module_utils.common.text.formatters import human_to_bytes
 SEGMENT = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9._-]*$")
 
 
-def storage_exports(catalog, vms, zone):
+def storage_exports(catalog, vms, addresses):
     """One export per (app, dataset) named by the images of the given VMs.
 
     catalog: the image catalog's `latest` output, keyed by <os>/<type>.
-    vms: the domain's vms.yaml, {defaults, vms: key => {image, name?, dhcp, ip4_address_cidr?, ...}}.
+    vms: the domain's vms.yaml, {defaults, vms: key => {image, dhcp, ip4_address_cidr?, ...}}.
+    addresses: VM key => {ip4_address_cidr, ...} reserved ahead of the VMs; empty in a domain without
+    reservations, whose VMs pin ip4_address_cidr in vms.yaml.
     Returns [{app, dataset, recordsize?, hosts, images}] sorted by app and dataset, hosts as sorted
-    addresses of static VMs and FQDNs of the others, images as sorted image names.
+    addresses, images as sorted image names.
     """
-    if not zone:
-        raise AnsibleFilterError("zone is empty")
-
     exports = {}
     first_image = {}
     for vm_key, settings in vms["vms"].items():
         vm = {**vms.get("defaults", {}), **settings}
-        host = _host(vm_key, vm, zone)
         image = vm["image"]
         if image not in catalog:
             raise AnsibleFilterError(f"VM {vm_key}: image {image} is not in the catalog")
-        for entry in catalog[image].get("storage") or []:
+        storage = catalog[image].get("storage") or []
+        if not storage:
+            continue
+        host = _host(vm_key, vm, addresses)
+        for entry in storage:
             key = (entry["app"], entry["dataset"])
             for segment in key:
                 if not SEGMENT.match(segment):
@@ -49,11 +51,16 @@ def storage_exports(catalog, vms, zone):
     return [exports[key] for key in sorted(exports)]
 
 
-def _host(key, vm, zone):
-    # A static VM is allowed by address: it may have no DNS record (e.g. the DNS servers themselves)
-    if not vm["dhcp"]:
+def _host(key, vm, addresses):
+    # By address, never by name: the NFS server resolves a name only when it loads the exports, so a
+    # record added later stays unseen until mountd restarts
+    if vm["dhcp"]:
+        raise AnsibleFilterError(f"VM {key}: a DHCP VM cannot use storage, which is shared by address")
+    if key in addresses:
+        return addresses[key]["ip4_address_cidr"].split("/")[0]
+    if vm.get("ip4_address_cidr"):
         return vm["ip4_address_cidr"].split("/")[0]
-    return f"{vm.get('name', key)}.{zone}"
+    raise AnsibleFilterError(f"VM {key}: no address reserved; apply the domain's 16-vm-addresses first")
 
 
 def recordsize_update(dataset_query, recordsize):

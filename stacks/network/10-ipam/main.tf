@@ -9,11 +9,16 @@ locals {
         name        = name
         vid         = vlan.vid
         prefix      = vlan.prefix
+        gateway     = vlan.gateway
+        dns         = vlan.dns
         description = vlan.description
         ranges      = vlan.ranges
       }
     }
   ]...)
+
+  # Gateway address => VLAN key; DNS servers must be gateways, so dns_servers can link their records
+  gateways = { for key, vlan in local.vlans : vlan.gateway => key if vlan.prefix != null }
 
   prefixes = merge(
     {
@@ -62,6 +67,37 @@ resource "netbox_vlan" "this" {
   description = each.value.description
 }
 
+resource "netbox_custom_field" "gateway" {
+  name                = "gateway"
+  label               = "Gateway"
+  type                = "object"
+  object_types        = ["ipam.prefix"]
+  related_object_type = "ipam.ipaddress"
+}
+
+resource "netbox_custom_field" "dns_servers" {
+  name                = "dns_servers"
+  label               = "DNS servers"
+  type                = "multiobject"
+  object_types        = ["ipam.prefix"]
+  related_object_type = "ipam.ipaddress"
+}
+
+resource "netbox_ip_address" "gateway" {
+  for_each = local.gateways
+
+  ip_address  = "${each.key}/${split("/", local.vlans[each.value].prefix)[1]}"
+  status      = "active"
+  description = "Gateway of ${local.vlans[each.value].name}"
+
+  lifecycle {
+    precondition {
+      condition     = cidrcontains(local.vlans[each.value].prefix, each.key)
+      error_message = "Gateway ${each.key} of ${each.value} lies outside ${local.vlans[each.value].prefix}."
+    }
+  }
+}
+
 resource "netbox_prefix" "this" {
   for_each = local.prefixes
 
@@ -69,6 +105,18 @@ resource "netbox_prefix" "this" {
   status      = each.value.status
   description = each.value.description
   vlan_id     = each.value.vlan == null ? null : netbox_vlan.this[each.value.vlan].id
+
+  custom_fields = each.value.vlan == null ? null : {
+    (netbox_custom_field.gateway.name)     = tostring(netbox_ip_address.gateway[local.vlans[each.value.vlan].gateway].id)
+    (netbox_custom_field.dns_servers.name) = jsonencode([for address in local.vlans[each.value.vlan].dns : try(netbox_ip_address.gateway[address].id, null)])
+  }
+
+  lifecycle {
+    precondition {
+      condition     = each.value.vlan == null || alltrue([for address in try(local.vlans[each.value.vlan].dns, []) : contains(keys(local.gateways), address)])
+      error_message = "DNS servers of ${coalesce(each.value.vlan, "-")} must each be the gateway of a VLAN in global-data/ipam.yaml."
+    }
+  }
 }
 
 resource "netbox_ipam_role" "this" {

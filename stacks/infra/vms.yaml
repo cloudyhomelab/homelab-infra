@@ -1,16 +1,20 @@
 ---
-# Every VM of the domain. Read by the VM stacks, which pick theirs by key, and by the storage playbook.
+# Every VM of the domain. Read by 16-vm-addresses, by the VM stacks, which pick theirs by key, and by the
+# storage playbook.
 # defaults: config fields every VM gets unless it sets its own.
 # vms: key => image (catalog key <os>/<type>), network (VLAN of global-data/ipam.yaml, resolved to a bridge
 #   by 10-proxmox-base) plus the module's other config fields; name defaults to the key.
+# Unless dhcp is true, 16-vm-addresses registers the VM's address in NetBox and, unless create_dns_record
+# is false, in DNS: ip4_address_cidr pins it, without it NetBox allocates one from the VLAN's static range;
+# gateway and DNS servers come from NetBox.
 defaults:
   node: pve-infra-1
+  dhcp: false
 
 vms:
   controlplane:
     image: debian/debian-controlplane
     network: MgmtNet
-    dhcp: true
     cpu: host
     cores: 2
     memory: 6144
@@ -19,12 +23,10 @@ vms:
   runner:
     image: debian/debian-runner
     network: LabNet
-    dhcp: true
 
   observability:
     image: debian/debian-observability
     network: LabNet
-    dhcp: true
     cores: 2
     memory: 4096
     disk_size: 50
@@ -32,37 +34,27 @@ vms:
   mgmt-ctl:
     image: debian/debian-management-ingress-control
     network: MgmtNet
-    dhcp: true
 
   lab-ctl:
     image: debian/debian-lab-ingress-control
     network: LabNet
-    dhcp: true
 
   iot-ctl:
     image: debian/debian-iot-ingress-control
     network: IoTNet
-    dhcp: true
 
   edge-ctl:
     image: debian/debian-edge
     network: MgmtNet
-    dhcp: false
     ip4_address_cidr: 10.88.0.211/24
-    gateway: 10.88.0.1
-    dns_addresses: [10.88.0.1]
 
   arr-stack:
     image: debian/debian-arr-stack
     network: LabNet
-    dhcp: true
 
   dns-secondary:
     image: debian/debian-dns-secondary
     name: ns2
     network: LabNet
-    dhcp: false
     ip4_address_cidr: 10.88.16.12/24
-    gateway: 10.88.16.1
-    dns_addresses: [10.88.16.1]
     create_dns_record: false
