@@ -3,6 +3,7 @@ module "images" {
 
   index_base_url = "${local.s3_url}/os-image-staging"
   images         = yamldecode(file("${path.module}/images.yaml"))
+  keep_latest    = 1
 }
 
 output "latest" {
