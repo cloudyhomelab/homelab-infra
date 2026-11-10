@@ -1,6 +1,6 @@
 ---
-# Every VM of the domain. Read by 16-vm-addresses, by the VM stacks, which pick theirs by key, and by the
-# storage playbook.
+# Every VM of the domain. Read by 16-vm-addresses, by the VM stacks, which pick theirs by key, and by
+# 17-storage.
 # defaults: config fields every VM gets unless it sets its own.
 # vms: key => image (catalog key <os>/<type>), network (VLAN of global-data/ipam.yaml, resolved to a bridge
 #   by 10-proxmox-base) plus the module's other config fields; name defaults to the key.
