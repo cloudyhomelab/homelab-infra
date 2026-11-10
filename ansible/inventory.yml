@@ -1,7 +1,0 @@
----
-truenas:
-  hosts:
-    moria.ip.cloudyhome.net:
-  vars:
-    ansible_user: binarycodes
-    truenas_pool: zpool0

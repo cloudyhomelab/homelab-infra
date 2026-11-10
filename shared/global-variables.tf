@@ -75,3 +75,10 @@ variable "reverse_zone" {
   type        = string
   nullable    = false
 }
+
+# tflint-ignore: terraform_unused_declarations
+variable "truenas_app_data_root" {
+  description = "TrueNAS dataset holding the app data datasets of every domain; created by hand."
+  type        = string
+  nullable    = false
+}

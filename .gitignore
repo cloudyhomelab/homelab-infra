@@ -7,6 +7,7 @@
 !stacks/**/global.auto.tfvars
 !stacks/**/netbox.auto.tfvars
 !stacks/**/opnsense.auto.tfvars
+!stacks/**/truenas.auto.tfvars
 !stacks/**/uplink.auto.tfvars
 crash.log
 backend_override.tf
@@ -17,8 +18,3 @@ secrets/*
 !secrets/*.sops.yaml
 
 docs/
-
-# Installed from ansible/requirements.yml
-ansible/collections/
-__pycache__/
-.pytest_cache/
