@@ -18,7 +18,3 @@ secrets/*
 !secrets/*.sops.yaml
 
 docs/
-
-# Installed from ansible/requirements.yml
-ansible/collections/
-__pycache__/
