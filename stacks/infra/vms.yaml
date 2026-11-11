@@ -51,6 +51,9 @@ vms:
   arr-stack:
     image: debian/debian-arr-stack
     network: LabNet
+    cores: 2
+    memory: 4096
+    disk_size: 20
 
   ns2:
     image: debian/debian-dns-secondary
