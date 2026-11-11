@@ -3,6 +3,7 @@ debian:
   - debian-controlplane
   - debian-dns-secondary
   - debian-edge
+  - debian-homeassistant
   - debian-iot-ingress-control
   - debian-lab-ingress-control
   - debian-management-ingress-control

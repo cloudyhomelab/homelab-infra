@@ -57,3 +57,7 @@ vms:
     network: LabNet
     ip4_address_cidr: 10.88.16.12/24
     create_dns_record: false
+
+  homeassistant:
+    image: debian/debian-homeassistant
+    network: IoTNet
