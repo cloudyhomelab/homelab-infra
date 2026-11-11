@@ -52,9 +52,8 @@ vms:
     image: debian/debian-arr-stack
     network: LabNet
 
-  dns-secondary:
+  ns2:
     image: debian/debian-dns-secondary
-    name: ns2
     network: LabNet
     ip4_address_cidr: 10.88.16.12/24
     create_dns_record: false
