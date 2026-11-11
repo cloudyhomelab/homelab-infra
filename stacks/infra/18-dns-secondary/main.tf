@@ -2,7 +2,7 @@ locals {
   vms = yamldecode(file("${path.module}/../vms.yaml"))
 
   # Keys of ../vms.yaml created here => settings with the domain defaults
-  vm = { for key in ["dns-secondary"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
+  vm = { for key in ["ns2"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
 
   addresses = data.terraform_remote_state.vm_addresses.outputs.addresses
 
