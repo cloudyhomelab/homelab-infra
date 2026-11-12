@@ -12,11 +12,11 @@ vms:
   dns-primary:
     image: debian/debian-dns-primary
     name: ns1
-    network: LabNet
+    network: DNSNet
     dhcp: false
-    ip4_address_cidr: 10.88.16.11/24
-    gateway: 10.88.16.1
-    dns_addresses: [10.88.16.1]
+    ip4_address_cidr: 10.88.53.11/28
+    gateway: 10.88.53.1
+    dns_addresses: [10.88.53.1]
     create_dns_record: false
 
   netbox:
