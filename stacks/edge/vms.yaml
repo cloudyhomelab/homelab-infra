@@ -18,6 +18,15 @@ vms:
     dns_addresses: [10.88.53.1]
     create_dns_record: false
 
+  resolver1:
+    image: debian/debian-dns-resolver
+    network: DNSNet
+    dhcp: false
+    ip4_address_cidr: 10.88.53.3/28
+    gateway: 10.88.53.1
+    dns_addresses: [10.88.53.1]
+    create_dns_record: true
+
   netbox:
     image: debian/debian-netbox
     network: LabNet
