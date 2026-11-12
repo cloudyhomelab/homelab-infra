@@ -18,6 +18,8 @@ locals {
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
     )
   }
+
+  forward_zones = toset([trimsuffix(var.dns_zone, "."), trimsuffix(var.reverse_zone, ".")])
 }
 
 data "terraform_remote_state" "proxmox_base" {
@@ -42,4 +44,11 @@ module "vm" {
   age_secret       = var.age_secret
 
   config = each.value
+}
+
+resource "opnsense_unbound_forward" "this" {
+  for_each = local.forward_zones
+
+  domain    = each.key
+  server_ip = module.vm["dns-primary"].vm_ipv4_address
 }

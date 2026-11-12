@@ -1,7 +1,6 @@
 ---
-# Every VM of the domain. Read by the VM stacks, which pick theirs by key, by 17-storage, by
-# 22-dns-forwarding, which forwards the DNS zones to dns-primary, and by 35-netbox-addresses, which
-# writes the static addresses to NetBox.
+# Every VM of the domain. Read by the VM stacks, which pick theirs by key, by 17-storage, and by
+# 35-netbox-addresses, which writes the static addresses to NetBox.
 # defaults: config fields every VM gets unless it sets its own.
 # vms: key => image (catalog key <os>/<type>), network (VLAN of global-data/ipam.yaml, resolved to a bridge
 #   by 10-proxmox-base) plus the module's other config fields; name defaults to the key.
