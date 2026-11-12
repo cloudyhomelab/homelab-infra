@@ -1,8 +1,18 @@
+locals {
+  vms = yamldecode(file("${path.module}/../vms.yaml"))
+
+  # <os>/<type> keys of ../vms.yaml => os => types, the shape the module takes
+  images = {
+    for key in distinct([for vm in values(local.vms.vms) : vm.image]) :
+    split("/", key)[0] => split("/", key)[1]...
+  }
+}
+
 module "images" {
   source = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-proxmox-image-catalog?ref=main"
 
   index_base_url = "${local.s3_url}/os-image-staging"
-  images         = yamldecode(file("${path.module}/images.yaml"))
+  images         = local.images
   keep_latest    = 1
 }
 

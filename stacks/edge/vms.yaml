@@ -1,5 +1,6 @@
 ---
-# Every VM of the domain. Read by the VM stacks, which pick theirs by key, by 17-storage, and by
+# Every VM of the domain. Read by 15-image-catalog, which fetches the images named here, by the VM
+# stacks, which pick theirs by key, by 17-storage, and by
 # 35-netbox-addresses, which writes the static addresses to NetBox.
 # defaults: config fields every VM gets unless it sets its own.
 # vms: key => image (catalog key <os>/<type>), network (VLAN of global-data/ipam.yaml, resolved to a bridge
@@ -17,6 +18,15 @@ vms:
     gateway: 10.88.53.1
     dns_addresses: [10.88.53.1]
     create_dns_record: false
+
+  resolver1:
+    image: debian/debian-dns-resolver
+    network: DNSNet
+    dhcp: false
+    ip4_address_cidr: 10.88.53.3/28
+    gateway: 10.88.53.1
+    dns_addresses: [10.88.53.1]
+    create_dns_record: true
 
   netbox:
     image: debian/debian-netbox

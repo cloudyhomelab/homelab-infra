@@ -1,5 +1,6 @@
 ---
-# Every VM of the domain. Read by 16-vm-addresses, by the VM stacks, which pick theirs by key, and by
+# Every VM of the domain. Read by 15-image-catalog, which fetches the images named here, by
+# 16-vm-addresses, by the VM stacks, which pick theirs by key, and by
 # 17-storage.
 # defaults: config fields every VM gets unless it sets its own.
 # vms: key => image (catalog key <os>/<type>), network (VLAN of global-data/ipam.yaml, resolved to a bridge
@@ -57,9 +58,14 @@ vms:
 
   ns2:
     image: debian/debian-dns-secondary
-    network: LabNet
-    ip4_address_cidr: 10.88.16.12/24
+    network: DNSNet
+    ip4_address_cidr: 10.88.53.12/28
     create_dns_record: false
+
+  resolver2:
+    image: debian/debian-dns-resolver
+    network: DNSNet
+    ip4_address_cidr: 10.88.53.4/28
 
   homeassistant:
     image: debian/debian-homeassistant
