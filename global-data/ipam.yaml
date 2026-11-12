@@ -34,6 +34,15 @@ vlan_groups:
       ranges:
         dhcp: { start: 10.88.0.101, end: 10.88.0.120 }
         static: { start: 10.88.0.150, end: 10.88.0.200 }
+  Service:
+    DNSNet:
+      description: DNS Zone
+      vid: 53
+      sdn: true
+      prefix: 10.88.53.0/28
+      gateway: 10.88.53.1
+      dns: [10.88.53.1]
+      ranges: {}
   Lab:
     IoTSecNet:
       description: IoT without Internet Access
