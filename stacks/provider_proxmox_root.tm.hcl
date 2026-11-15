@@ -1,3 +1,8 @@
+assert {
+  assertion = !(tm_contains(terramate.stack.tags, "proxmox") && tm_contains(terramate.stack.tags, "proxmox-root"))
+  message   = "tags proxmox and proxmox-root are two ways of connecting to proxmox; use one"
+}
+
 generate_hcl "_terramate_generated_proxmox_root.tf" {
   condition = tm_contains(terramate.stack.tags, "proxmox-root")
 

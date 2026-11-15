@@ -12,6 +12,28 @@ globals {
   reverse_zone          = "88.10.in-addr.arpa."
   truenas_app_data_root = "zpool0/cloudyhome_app_data"
   s3_url                = "http://moria.ip.cloudyhome.net:9000"
+
+  # One per tm_dynamic block below; an unmatched name in `uses` would otherwise generate nothing, silently
+  shared_entries = [
+    "timezone",
+    "token_rotation_days",
+    "token_grace_days",
+    "acme_account_name",
+    "acme_contact_email",
+    "pve_search_domain",
+    "porkbun_api_key",
+    "porkbun_secret_api_key",
+    "dns_zone",
+    "reverse_zone",
+    "truenas_app_data_root",
+    "s3_url",
+    "acme_dns",
+  ]
+}
+
+assert {
+  assertion = tm_length(tm_setsubtract(global.uses, global.shared_entries)) == 0
+  message   = "uses has names with no block in stacks/shared.tm.hcl: ${tm_join(", ", tm_setsubtract(global.uses, global.shared_entries))}"
 }
 
 generate_hcl "_terramate_generated_shared.tf" {
