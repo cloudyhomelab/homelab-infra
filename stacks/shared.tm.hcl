@@ -11,6 +11,7 @@ globals {
   dns_zone              = "ip.cloudyhome.net"
   reverse_zone          = "88.10.in-addr.arpa."
   truenas_app_data_root = "zpool0/cloudyhome_app_data"
+  s3_url                = "http://moria.ip.cloudyhome.net:9000"
 }
 
 generate_hcl "_terramate_generated_shared.tf" {
@@ -135,7 +136,7 @@ generate_hcl "_terramate_generated_shared.tf" {
     tm_dynamic "locals" {
       condition = tm_contains(global.uses, "s3_url")
       content {
-        s3_url = "http://moria.ip.cloudyhome.net:9000"
+        s3_url = global.s3_url
       }
     }
 
