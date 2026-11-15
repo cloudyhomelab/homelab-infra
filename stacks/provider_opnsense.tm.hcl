@@ -27,7 +27,6 @@ generate_hcl "_terramate_generated_opnsense.tf" {
       api_key    = var.opnsense_api_key
       api_secret = var.opnsense_api_secret
 
-      # The web GUI still serves a self-signed certificate; see #12 in docs/plan.org
       allow_insecure = true
     }
   }
