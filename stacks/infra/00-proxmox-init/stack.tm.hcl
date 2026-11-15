@@ -1,6 +1,8 @@
 stack {
-  id   = "b5b23765-3fb0-40d7-80d0-6ac0ee7f96e2"
-  tags = ["proxmox-root"]
+  id          = "b5b23765-3fb0-40d7-80d0-6ac0ee7f96e2"
+  name        = "00-proxmox-init"
+  description = "Initial preparation steps for the Proxmox environment"
+  tags        = ["proxmox-root"]
 }
 
 globals {

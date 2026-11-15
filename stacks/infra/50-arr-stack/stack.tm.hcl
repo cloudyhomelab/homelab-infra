@@ -1,6 +1,8 @@
 stack {
-  id   = "585bf157-d0f1-4d54-8b4d-3a05c6a741f8"
-  tags = ["dns", "keycloak", "proxmox"]
+  id          = "585bf157-d0f1-4d54-8b4d-3a05c6a741f8"
+  name        = "50-arr-stack"
+  description = "Media automation server"
+  tags        = ["dns", "keycloak", "proxmox"]
 }
 
 globals {

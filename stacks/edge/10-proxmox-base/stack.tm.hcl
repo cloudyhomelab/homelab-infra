@@ -1,6 +1,8 @@
 stack {
-  id   = "f0ca6ccb-dbae-44b9-8a2b-15fe431feec0"
-  tags = ["proxmox"]
+  id          = "f0ca6ccb-dbae-44b9-8a2b-15fe431feec0"
+  name        = "10-proxmox-base"
+  description = "Prepare the Proxmox environment for deployments"
+  tags        = ["proxmox"]
 }
 
 globals {
