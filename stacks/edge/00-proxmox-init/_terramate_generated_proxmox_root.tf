@@ -1,8 +1,5 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
-variable "proxmox_endpoint" {
-  type = string
-}
 variable "proxmox_username" {
   description = "Admin user that creates the API token, as name@realm."
   type        = string
@@ -14,7 +11,7 @@ variable "proxmox_password" {
   type        = string
 }
 provider "proxmox" {
-  endpoint = var.proxmox_endpoint
+  endpoint = "https://pve-lab-1.ip.cloudyhome.net:8006"
   insecure = true
   password = var.proxmox_password
   username = var.proxmox_username

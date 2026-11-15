@@ -13,6 +13,12 @@ globals {
   truenas_app_data_root = "zpool0/cloudyhome_app_data"
   s3_url                = "http://moria.ip.cloudyhome.net:9000"
 
+  # Keyed by the pve_type global each domain sets
+  pve_endpoints = {
+    edge  = "https://pve-lab-1.ip.cloudyhome.net:8006"
+    infra = "https://pve-infra-1.ip.cloudyhome.net:8006"
+  }
+
   # One per tm_dynamic block below; an unmatched name in `uses` would otherwise generate nothing, silently
   shared_entries = [
     "timezone",

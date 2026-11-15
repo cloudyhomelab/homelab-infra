@@ -2,10 +2,6 @@ generate_hcl "_terramate_generated_proxmox.tf" {
   condition = tm_contains(terramate.stack.tags, "proxmox")
 
   content {
-    variable "proxmox_endpoint" {
-      type = string
-    }
-
     variable "proxmox_ssh_private_key" {
       type      = string
       sensitive = true
@@ -18,7 +14,7 @@ generate_hcl "_terramate_generated_proxmox.tf" {
     }
 
     provider "proxmox" {
-      endpoint  = var.proxmox_endpoint
+      endpoint  = global.pve_endpoints[global.pve_type]
       api_token = data.terraform_remote_state.proxmox_init.outputs.user_token
 
       insecure = true

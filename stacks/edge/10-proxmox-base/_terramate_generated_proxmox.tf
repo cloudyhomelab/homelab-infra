@@ -1,8 +1,5 @@
 // TERRAMATE: GENERATED AUTOMATICALLY DO NOT EDIT
 
-variable "proxmox_endpoint" {
-  type = string
-}
 variable "proxmox_ssh_private_key" {
   ephemeral = true
   sensitive = true
@@ -16,7 +13,7 @@ data "terraform_remote_state" "proxmox_init" {
 }
 provider "proxmox" {
   api_token = data.terraform_remote_state.proxmox_init.outputs.user_token
-  endpoint  = var.proxmox_endpoint
+  endpoint  = "https://pve-lab-1.ip.cloudyhome.net:8006"
   insecure  = true
   ssh {
     agent       = false

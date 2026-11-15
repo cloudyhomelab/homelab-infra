@@ -7,10 +7,6 @@ generate_hcl "_terramate_generated_proxmox_root.tf" {
   condition = tm_contains(terramate.stack.tags, "proxmox-root")
 
   content {
-    variable "proxmox_endpoint" {
-      type = string
-    }
-
     variable "proxmox_username" {
       description = "Admin user that creates the API token, as name@realm."
       type        = string
@@ -24,7 +20,7 @@ generate_hcl "_terramate_generated_proxmox_root.tf" {
     }
 
     provider "proxmox" {
-      endpoint = var.proxmox_endpoint
+      endpoint = global.pve_endpoints[global.pve_type]
       username = var.proxmox_username
       password = var.proxmox_password
 
