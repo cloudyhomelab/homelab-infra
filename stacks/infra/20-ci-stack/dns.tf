@@ -1,1 +1,0 @@
-../../../shared/providers/dns.tf

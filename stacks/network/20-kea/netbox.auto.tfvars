@@ -1,1 +1,0 @@
-../../netbox.auto.tfvars
