@@ -20,7 +20,7 @@ stacks domain="":
     set -euo pipefail
     for d in {{ if domain == "" { domains } else { domain } }}; do
       [[ -d "stacks/$d" ]] || continue
-      find "stacks/$d" -mindepth 2 -maxdepth 2 -name '*.tf' -printf '%h\n' | sort -u | sed 's|^stacks/||'
+      terramate -C "stacks/$d" list --run-order | sed "s|^|$d/|"
     done
 
 # Run any tofu command in a stack with the global and its domain's secrets loaded
@@ -65,7 +65,7 @@ mv-stack stack name:
     [[ "{{ name }}" != */* ]] || { echo "new name is a directory inside the domain, not a path: {{ name }}" >&2; exit 1; }
     compgen -G "stacks/{{ stack }}/*.tf" >/dev/null || { echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1; }
     [[ ! -e "stacks/$domain/{{ name }}" ]] || { echo "already exists: $domain/{{ name }}" >&2; exit 1; }
-    # Other stacks read state by key and link files by path; those would silently break
+    # Other stacks read state by key or files by path; those would silently break
     refs="$( {
       grep -rnF --exclude-dir=.terraform -e "$old.tfstate" "stacks/$domain" || true
       grep -rnF --exclude-dir=.terraform -e "/$old" stacks scripts justfile || true

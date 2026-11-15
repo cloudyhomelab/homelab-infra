@@ -1,1 +1,0 @@
-../../../shared/providers/netbox.tf

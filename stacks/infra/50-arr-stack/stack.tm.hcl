@@ -1,0 +1,8 @@
+stack {
+  id   = "585bf157-d0f1-4d54-8b4d-3a05c6a741f8"
+  tags = ["dns", "keycloak", "proxmox"]
+}
+
+globals {
+  uses = ["timezone", "dns_zone", "reverse_zone"]
+}

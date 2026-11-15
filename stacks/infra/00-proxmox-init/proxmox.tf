@@ -1,1 +1,0 @@
-../../../shared/providers/proxmox-root.tf
