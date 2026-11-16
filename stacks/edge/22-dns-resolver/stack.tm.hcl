@@ -3,6 +3,9 @@ stack {
   name        = "22-dns-resolver"
   description = "DNS resolver"
   tags        = ["dns", "keycloak", "proxmox"]
+  watch = [
+    "/stacks/edge/vms.yaml",
+  ]
 }
 
 globals {

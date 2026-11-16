@@ -3,6 +3,9 @@ stack {
   name        = "18-dns-secondary"
   description = "Secondary authoritative DNS server"
   tags        = ["dns", "keycloak", "opnsense", "proxmox"]
+  watch = [
+    "/stacks/infra/vms.yaml",
+  ]
 }
 
 globals {

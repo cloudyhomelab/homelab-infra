@@ -3,6 +3,9 @@ stack {
   name        = "25-dns-records"
   description = "Record static IPs in the DNS records"
   tags        = ["dns"]
+  watch = [
+    "/stacks/edge/bootstrap-static-dns.yaml",
+  ]
 }
 
 globals {

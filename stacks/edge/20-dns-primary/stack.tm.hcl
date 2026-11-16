@@ -3,6 +3,9 @@ stack {
   name        = "20-dns-primary"
   description = "Primary authoritative DNS server"
   tags        = ["dns", "keycloak", "opnsense", "proxmox"]
+  watch = [
+    "/stacks/edge/vms.yaml",
+  ]
 }
 
 globals {

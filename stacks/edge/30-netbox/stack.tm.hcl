@@ -3,6 +3,9 @@ stack {
   name        = "30-netbox"
   description = "NetBox, the IPAM source of truth"
   tags        = ["dns", "keycloak", "proxmox"]
+  watch = [
+    "/stacks/edge/vms.yaml",
+  ]
 }
 
 globals {

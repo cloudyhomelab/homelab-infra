@@ -3,6 +3,9 @@ stack {
   name        = "60-homeassistant"
   description = "Home Assistant server"
   tags        = ["dns", "keycloak", "proxmox"]
+  watch = [
+    "/stacks/infra/vms.yaml",
+  ]
 }
 
 globals {

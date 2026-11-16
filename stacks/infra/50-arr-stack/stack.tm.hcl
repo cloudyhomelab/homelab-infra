@@ -3,6 +3,9 @@ stack {
   name        = "50-arr-stack"
   description = "Media automation server"
   tags        = ["dns", "keycloak", "proxmox"]
+  watch = [
+    "/stacks/infra/vms.yaml",
+  ]
 }
 
 globals {

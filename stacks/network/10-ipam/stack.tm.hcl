@@ -3,4 +3,7 @@ stack {
   name        = "10-ipam"
   description = "NetBox VLANs, prefixes, IP ranges and gateways from global-data/ipam.yaml"
   tags        = ["netbox"]
+  watch = [
+    "/global-data/ipam.yaml",
+  ]
 }

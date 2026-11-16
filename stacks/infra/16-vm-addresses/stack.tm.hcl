@@ -3,6 +3,9 @@ stack {
   name        = "16-vm-addresses"
   description = "NetBox IP reservations and DNS records of the static VMs"
   tags        = ["dns", "netbox"]
+  watch = [
+    "/stacks/infra/vms.yaml",
+  ]
 }
 
 globals {

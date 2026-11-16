@@ -3,6 +3,9 @@ stack {
   name        = "40-ingress-control"
   description = "Ingress controllers, one per network"
   tags        = ["dns", "keycloak", "proxmox"]
+  watch = [
+    "/stacks/infra/vms.yaml",
+  ]
 }
 
 globals {

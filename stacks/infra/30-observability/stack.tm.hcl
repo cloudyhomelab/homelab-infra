@@ -3,6 +3,9 @@ stack {
   name        = "30-observability"
   description = "Observability server"
   tags        = ["dns", "keycloak", "proxmox"]
+  watch = [
+    "/stacks/infra/vms.yaml",
+  ]
 }
 
 globals {

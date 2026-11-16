@@ -3,6 +3,9 @@ stack {
   name        = "17-storage"
   description = "TrueNAS datasets and NFS shares for all VMs in the environment"
   tags        = ["truenas"]
+  watch = [
+    "/stacks/edge/vms.yaml",
+  ]
 }
 
 globals {

@@ -3,6 +3,11 @@ stack {
   name        = "35-netbox-addresses"
   description = "NetBox IP addresses of the VMs and bootstrap DNS records"
   tags        = ["netbox"]
+  watch = [
+    "/global-data/ipam.yaml",
+    "/stacks/edge/bootstrap-static-dns.yaml",
+    "/stacks/edge/vms.yaml",
+  ]
 }
 
 globals {
