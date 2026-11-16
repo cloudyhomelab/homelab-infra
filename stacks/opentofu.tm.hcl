@@ -23,7 +23,7 @@ globals {
     }
     keycloak = {
       source  = "keycloak/keycloak"
-      version = "5.9.0"
+      version = "5.10.0"
       tags    = ["keycloak"]
     }
     dns = {
