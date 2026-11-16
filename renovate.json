@@ -23,6 +23,16 @@
       "registryUrls": ["https://registry.opentofu.org"]
     },
     {
+      "description": "Renovate's lock update hashes only the release zips; tofu init also records the manifest hash, which otherwise shows up as a diff on the first local init. The binary path is set by the workflow",
+      "matchManagers": ["terraform"],
+      "matchDepTypes": ["required_provider"],
+      "postUpgradeTasks": {
+        "commands": ["/tmp/renovate-tools/tofu -chdir={{{packageFileDir}}} init -backend=false -input=false"],
+        "fileFilters": ["**/.terraform.lock.hcl"],
+        "executionMode": "update"
+      }
+    },
+    {
       "description": "required_version is an OpenTofu floor; Renovate would look it up as Terraform",
       "matchDepTypes": ["required_version"],
       "enabled": false
