@@ -11,31 +11,15 @@ terraform {
       source  = "keycloak/keycloak"
       version = "5.9.0"
     }
-    netbox = {
-      source  = "e-breuninger/netbox"
-      version = "6.0.0"
-    }
-    opnsense = {
-      source  = "browningluke/opnsense"
-      version = "0.26.0"
-    }
     proxmox = {
       source  = "bpg/proxmox"
       version = "0.115.0"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.14.2"
-    }
-    truenas = {
-      source  = "truenas/truenas"
-      version = "1.9.0"
     }
   }
   backend "s3" {
     bucket                      = local.state_backend.bucket
     endpoints                   = local.state_backend.endpoints
-    key                         = "${var.state_key}.tfstate"
+    key                         = "50-arr-stack.tfstate"
     region                      = local.state_backend.region
     skip_credentials_validation = local.state_backend.skip_credentials_validation
     skip_metadata_api_check     = local.state_backend.skip_metadata_api_check
@@ -68,34 +52,18 @@ terraform {
 }
 locals {
   state_backend = {
-    bucket = var.state_bucket
+    bucket = "tofu-state-infra"
     endpoints = {
-      s3 = var.state_endpoint
+      s3 = "http://moria.ip.cloudyhome.net:9000"
     }
-    region                      = var.state_region
-    use_path_style              = true
-    use_lockfile                = true
+    region                      = "home"
     skip_credentials_validation = true
-    skip_requesting_account_id  = true
     skip_metadata_api_check     = true
     skip_region_validation      = true
+    skip_requesting_account_id  = true
+    use_lockfile                = true
+    use_path_style              = true
   }
-}
-variable "state_bucket" {
-  description = "The domain's state bucket, set by the justfile."
-  type        = string
-}
-variable "state_endpoint" {
-  description = "URL of the S3 server holding state, set by the justfile."
-  type        = string
-}
-variable "state_region" {
-  description = "Region sent to the S3 server, set by the justfile."
-  type        = string
-}
-variable "state_key" {
-  description = "The stack's path inside its domain, e.g. 10-proxmox-base, set by the justfile."
-  type        = string
 }
 variable "state_passphrase" {
   ephemeral = true

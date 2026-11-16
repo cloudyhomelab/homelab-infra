@@ -3,13 +3,6 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 # Apply order across failure domains
 domains := "level0 edge network infra apps"
 
-# One state bucket per domain: <prefix><domain>
-state_bucket_prefix := "tofu-state-"
-
-# S3 server holding state, passed to the backend and read by scripts/s3-state.sh
-state_endpoint := "http://moria.ip.cloudyhome.net:9000"
-state_region := "home"
-
 # Show this list
 default:
     @just --list
@@ -32,10 +25,6 @@ tofu stack +args:
     domain="${domain%%/*}"
     compgen -G "$dir/*.tf" >/dev/null || { echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1; }
     source scripts/load-secrets.sh "$domain"
-    export TF_VAR_state_endpoint="{{ state_endpoint }}"
-    export TF_VAR_state_region="{{ state_region }}"
-    export TF_VAR_state_bucket="{{ state_bucket_prefix }}${domain}"
-    export TF_VAR_state_key="${dir#stacks/*/}"
     exec tofu -chdir="$dir" {{ args }}
 
 # Initialise one stack's backend and providers
@@ -63,6 +52,8 @@ mv-stack stack name:
     old="{{ stack }}"
     old="${old#*/}"
     [[ "{{ name }}" != */* ]] || { echo "new name is a directory inside the domain, not a path: {{ name }}" >&2; exit 1; }
+    # Keeps both names safe to splice into the sed expression below
+    [[ "$old" =~ ^[A-Za-z0-9._-]+$ && "{{ name }}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "stack names may only contain letters, digits, '.', '_' and '-'" >&2; exit 1; }
     compgen -G "stacks/{{ stack }}/*.tf" >/dev/null || { echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1; }
     [[ ! -e "stacks/$domain/{{ name }}" ]] || { echo "already exists: $domain/{{ name }}" >&2; exit 1; }
     # Other stacks read state by key or files by path; those would silently break
@@ -77,6 +68,8 @@ mv-stack stack name:
     fi
     # Init under the old key first so -migrate-state knows where to copy from
     just tofu {{ stack }} init -input=false
+    # Before the mv, so a failure leaves the stack where it was; only inside the top-level stack block
+    sed -i -E "/^stack[[:space:]]*\{/,/^\}/ s|^([[:space:]]*name[[:space:]]*=[[:space:]]*)\"${old//./\\.}\"|\1\"{{ name }}\"|" "stacks/{{ stack }}/stack.tm.hcl"
     mv "stacks/{{ stack }}" "stacks/$domain/{{ name }}"
     just tofu "$domain/{{ name }}" init -migrate-state
     just tofu "$domain/{{ name }}" plan -detailed-exitcode

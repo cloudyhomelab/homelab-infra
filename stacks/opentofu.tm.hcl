@@ -1,38 +1,70 @@
+globals {
+  # One state bucket per domain: <prefix><domain>; scripts/s3-state.sh creates it
+  state_bucket_prefix = "tofu-state-"
+  state_endpoint      = global.s3_url
+  state_region        = global.s3_region
+
+  # A stack gets the providers whose tags it carries; proxmox-root stacks use the proxmox provider too
+  providers = {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.115.0"
+      tags    = ["proxmox", "proxmox-root"]
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.14.2"
+      tags    = ["time"]
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "3.6.3"
+      tags    = ["http"]
+    }
+    keycloak = {
+      source  = "keycloak/keycloak"
+      version = "5.9.0"
+      tags    = ["keycloak"]
+    }
+    dns = {
+      source  = "hashicorp/dns"
+      version = "3.6.2"
+      tags    = ["dns"]
+    }
+    netbox = {
+      source  = "e-breuninger/netbox"
+      version = "6.0.0"
+      tags    = ["netbox"]
+    }
+    opnsense = {
+      source  = "browningluke/opnsense"
+      version = "0.26.0"
+      tags    = ["opnsense"]
+    }
+    truenas = {
+      source  = "truenas/truenas"
+      version = "1.9.0"
+      tags    = ["truenas"]
+    }
+  }
+}
+
 generate_hcl "_terramate_generated_opentofu.tf" {
+  lets {
+    domain = tm_basename(tm_dirname(terramate.stack.path.absolute))
+  }
+
   content {
     terraform {
       required_version = ">= 1.11.2"
 
-      # The one required_providers block per stack: OpenTofu allows no second one, so every
-      # provider used anywhere is pinned here, whether or not a stack uses it
-      required_providers {
-        proxmox = {
-          source  = "bpg/proxmox"
-          version = "0.115.0"
-        }
-        time = {
-          source  = "hashicorp/time"
-          version = "0.14.2"
-        }
-        keycloak = {
-          source  = "keycloak/keycloak"
-          version = "5.9.0"
-        }
-        dns = {
-          source  = "hashicorp/dns"
-          version = "3.6.2"
-        }
-        netbox = {
-          source  = "e-breuninger/netbox"
-          version = "6.0.0"
-        }
-        opnsense = {
-          source  = "browningluke/opnsense"
-          version = "0.26.0"
-        }
-        truenas = {
-          source  = "truenas/truenas"
-          version = "1.9.0"
+      # The one required_providers block per stack: OpenTofu allows no second one
+      tm_dynamic "required_providers" {
+        attributes = {
+          for name, p in global.providers : name => {
+            source  = p.source
+            version = p.version
+          } if tm_length(tm_setintersection(p.tags, terramate.stack.tags)) > 0
         }
       }
 
@@ -41,7 +73,7 @@ generate_hcl "_terramate_generated_opentofu.tf" {
       # in plain text under .terraform/.
       backend "s3" {
         bucket                      = local.state_backend.bucket
-        key                         = "${var.state_key}.tfstate"
+        key                         = "${terramate.stack.path.basename}.tfstate"
         endpoints                   = local.state_backend.endpoints
         region                      = local.state_backend.region
         use_path_style              = local.state_backend.use_path_style
@@ -78,9 +110,9 @@ generate_hcl "_terramate_generated_opentofu.tf" {
     locals {
       # Shared by the backend and terraform_remote_state reads of other stacks in the domain
       state_backend = {
-        bucket                      = var.state_bucket
-        endpoints                   = { s3 = var.state_endpoint }
-        region                      = var.state_region
+        bucket                      = "${global.state_bucket_prefix}${let.domain}"
+        endpoints                   = { s3 = global.state_endpoint }
+        region                      = global.state_region
         use_path_style              = true
         use_lockfile                = true
         skip_credentials_validation = true
@@ -88,26 +120,6 @@ generate_hcl "_terramate_generated_opentofu.tf" {
         skip_metadata_api_check     = true
         skip_region_validation      = true
       }
-    }
-
-    variable "state_bucket" {
-      description = "The domain's state bucket, set by the justfile."
-      type        = string
-    }
-
-    variable "state_endpoint" {
-      description = "URL of the S3 server holding state, set by the justfile."
-      type        = string
-    }
-
-    variable "state_region" {
-      description = "Region sent to the S3 server, set by the justfile."
-      type        = string
-    }
-
-    variable "state_key" {
-      description = "The stack's path inside its domain, e.g. 10-proxmox-base, set by the justfile."
-      type        = string
     }
 
     variable "state_passphrase" {
