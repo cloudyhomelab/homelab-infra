@@ -35,7 +35,7 @@ terraform {
   backend "s3" {
     bucket                      = local.state_backend.bucket
     endpoints                   = local.state_backend.endpoints
-    key                         = "${var.state_key}.tfstate"
+    key                         = "17-storage.tfstate"
     region                      = local.state_backend.region
     skip_credentials_validation = local.state_backend.skip_credentials_validation
     skip_metadata_api_check     = local.state_backend.skip_metadata_api_check
@@ -68,7 +68,7 @@ terraform {
 }
 locals {
   state_backend = {
-    bucket = var.state_bucket
+    bucket = "tofu-state-edge"
     endpoints = {
       s3 = var.state_endpoint
     }
@@ -81,20 +81,12 @@ locals {
     skip_region_validation      = true
   }
 }
-variable "state_bucket" {
-  description = "The domain's state bucket, set by the justfile."
-  type        = string
-}
 variable "state_endpoint" {
   description = "URL of the S3 server holding state, set by the justfile."
   type        = string
 }
 variable "state_region" {
   description = "Region sent to the S3 server, set by the justfile."
-  type        = string
-}
-variable "state_key" {
-  description = "The stack's path inside its domain, e.g. 10-proxmox-base, set by the justfile."
   type        = string
 }
 variable "state_passphrase" {

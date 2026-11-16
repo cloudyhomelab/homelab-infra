@@ -3,9 +3,6 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 # Apply order across failure domains
 domains := "level0 edge network infra apps"
 
-# One state bucket per domain: <prefix><domain>
-state_bucket_prefix := "tofu-state-"
-
 # S3 server holding state, passed to the backend and read by scripts/s3-state.sh
 state_endpoint := "http://moria.ip.cloudyhome.net:9000"
 state_region := "home"
@@ -34,8 +31,6 @@ tofu stack +args:
     source scripts/load-secrets.sh "$domain"
     export TF_VAR_state_endpoint="{{ state_endpoint }}"
     export TF_VAR_state_region="{{ state_region }}"
-    export TF_VAR_state_bucket="{{ state_bucket_prefix }}${domain}"
-    export TF_VAR_state_key="${dir#stacks/*/}"
     exec tofu -chdir="$dir" {{ args }}
 
 # Initialise one stack's backend and providers

@@ -1,4 +1,13 @@
+globals {
+  # One state bucket per domain: <prefix><domain>; scripts/s3-state.sh creates it
+  state_bucket_prefix = "tofu-state-"
+}
+
 generate_hcl "_terramate_generated_opentofu.tf" {
+  lets {
+    domain = tm_basename(tm_dirname(terramate.stack.path.absolute))
+  }
+
   content {
     terraform {
       required_version = ">= 1.11.2"
@@ -41,7 +50,7 @@ generate_hcl "_terramate_generated_opentofu.tf" {
       # in plain text under .terraform/.
       backend "s3" {
         bucket                      = local.state_backend.bucket
-        key                         = "${var.state_key}.tfstate"
+        key                         = "${terramate.stack.path.basename}.tfstate"
         endpoints                   = local.state_backend.endpoints
         region                      = local.state_backend.region
         use_path_style              = local.state_backend.use_path_style
@@ -78,7 +87,7 @@ generate_hcl "_terramate_generated_opentofu.tf" {
     locals {
       # Shared by the backend and terraform_remote_state reads of other stacks in the domain
       state_backend = {
-        bucket                      = var.state_bucket
+        bucket                      = "${global.state_bucket_prefix}${let.domain}"
         endpoints                   = { s3 = var.state_endpoint }
         region                      = var.state_region
         use_path_style              = true
@@ -90,11 +99,6 @@ generate_hcl "_terramate_generated_opentofu.tf" {
       }
     }
 
-    variable "state_bucket" {
-      description = "The domain's state bucket, set by the justfile."
-      type        = string
-    }
-
     variable "state_endpoint" {
       description = "URL of the S3 server holding state, set by the justfile."
       type        = string
@@ -102,11 +106,6 @@ generate_hcl "_terramate_generated_opentofu.tf" {
 
     variable "state_region" {
       description = "Region sent to the S3 server, set by the justfile."
-      type        = string
-    }
-
-    variable "state_key" {
-      description = "The stack's path inside its domain, e.g. 10-proxmox-base, set by the justfile."
       type        = string
     }
 
