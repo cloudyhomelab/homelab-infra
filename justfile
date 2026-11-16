@@ -73,56 +73,34 @@ mv-stack stack name:
     just tofu "$domain/{{ name }}" init -migrate-state
     just tofu "$domain/{{ name }}" plan -detailed-exitcode
 
-# Initialise every stack in a domain
-init-domain domain:
+# Run a terramate run command line in every stack of a domain, with the global and the domain's secrets loaded
+[private]
+domain-run domain +args:
     #!/usr/bin/env bash
     set -euo pipefail
-    stacks="$(just stacks {{ domain }})"
-    for s in $stacks; do
-      echo "==> $s"
-      just init "$s"
-    done
+    [[ -d "stacks/{{ domain }}" ]] || { echo "not a domain: {{ domain }}" >&2; exit 1; }
+    source scripts/load-secrets.sh "{{ domain }}"
+    exec terramate -C "stacks/{{ domain }}" run {{ args }}
+
+# Initialise every stack in a domain
+init-domain domain:
+    just domain-run {{ domain }} --disable-safeguards=git -- tofu init
 
 # Re-initialise every tofu stack in a domain after a config change, keeping state in place
 reconfigure-domain domain:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    stacks="$(just stacks {{ domain }})"
-    for s in $stacks; do
-      echo "==> $s"
-      just tofu "$s" init -reconfigure
-    done
+    just domain-run {{ domain }} --disable-safeguards=git -- tofu init -reconfigure
 
 # Upgrade every tofu stack in a domain to reselect module and provider after version upgrades
 upgrade-domain domain:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    stacks="$(just stacks {{ domain }})"
-    for s in $stacks; do
-      echo "==> $s"
-      just tofu "$s" init -upgrade
-    done
+    just domain-run {{ domain }} --disable-safeguards=git -- tofu init -upgrade
 
-
-# Plan every stack in a domain, in apply order
+# Plan every stack in a domain, in apply order; uncommitted changes are planned too
 plan-domain domain:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    stacks="$(just stacks {{ domain }})"
-    for s in $stacks; do
-      echo "==> $s"
-      just plan "$s"
-    done
+    just domain-run {{ domain }} --disable-safeguards=git -- tofu plan
 
-# Apply every stack in a domain in order, each with its own approval prompt
+# Apply every stack in a domain in order, each with its own approval prompt; only from committed code in sync with the remote
 apply-domain domain:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    stacks="$(just stacks {{ domain }})"
-    for s in $stacks; do
-      echo "==> $s"
-      just apply "$s"
-    done
+    just domain-run {{ domain }} -- tofu apply
 
 # Edit a domain's secrets file
 secrets domain:
