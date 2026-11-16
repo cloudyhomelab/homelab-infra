@@ -9,7 +9,7 @@ terraform {
     }
     keycloak = {
       source  = "keycloak/keycloak"
-      version = "5.9.0"
+      version = "5.10.0"
     }
     opnsense = {
       source  = "browningluke/opnsense"
