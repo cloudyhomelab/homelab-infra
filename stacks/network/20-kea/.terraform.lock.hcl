@@ -36,25 +36,24 @@ provider "registry.opentofu.org/browningluke/opnsense" {
 }
 
 provider "registry.opentofu.org/e-breuninger/netbox" {
-  version     = "6.0.0"
-  constraints = "6.0.0"
+  version     = "6.0.1"
+  constraints = "6.0.1"
   hashes = [
-    "h1:EkrKcgmf8XCXNYfitK23o9KeQ3vsEcxeR1jL4JQuSBc=",
-    "h1:HnF9m7HAIKp7+43CPLAXu0ZD0P5M+/fwf+2YnlfqflM=",
-    "h1:L4QTwJAW8EqZnK5KOm1P8JhD/EhD5dIQvOoPxYMwkD8=",
-    "h1:SAPxdLuJLwsfu1NeeJH+2ZNp3aLAyDVycTIkJMX/HZo=",
-    "h1:cBnwIWLmoFcMQq6n2IeQZY1rEqLn+nYZVk/ZEie0sn4=",
-    "h1:iC2jzPhFhkkcI73TjUuks+JuwiobMZh7VrqzDaaEdIk=",
-    "h1:vsvFRi90BdEfMS11d4bFu7VxbMliDCqBNoclialvwJc=",
-    "h1:yA22cnr/AehQnwu4WTfv3ylWay6ASXfzPGKh0zXlRC8=",
-    "zh:50a593d6c2db616123838c798cc47ba44b9a9ba30bcbd60cf106a6ef5f8ae0a7",
-    "zh:61e89cfc1d4b9daa128f00d577ab184d80f40093a68cc19a55a18f722ad49936",
-    "zh:6f6dda44d013b1e36afd61f7ea50a028b58344d4fd23d6403e996cfa0841fec4",
-    "zh:78449bf996533c1152632d29a59477515dbab8879d0f73e3e4deef71380fc0e6",
-    "zh:85ac69f7ab82e1cea1d7c27551ee1c19a009d257d86515c007587c79e4d03199",
-    "zh:a8ca34a3159a39e8fa4f5f77d9b6b5a49e2b9460e5692490ac4b2b0994695ecf",
-    "zh:ada10fd3158f2079c54d51a16777b8ae2b8fe7d07440cbd8a27f9f8994343d69",
-    "zh:e3b30d8626bfc5fd284fbadb417a375f77b30a44df20ebfc1137fdcb0f69d1da",
-    "zh:f809ab383cca0a5f83072981c64208cbd7fa67e986a86ee02dd2c82333221e32",
+    "h1:VI+Cqx5CM6R1GHHgnUmDfL3A7Aew5xf8n+Wg3tZaMd4=",
+    "h1:ZxoTmuNpn0i0/L5YDYZN+7DOnHOpblWLEIBKpyyKww8=",
+    "h1:ed5qAq5O9JkzQWqGKUPQ2cFkl+kUW8GpRxf6v/8QVoc=",
+    "h1:gdPBMpVGp4mQ3wYkKfVBx+G0ZJltnbJ9pwa0otZMoEo=",
+    "h1:ndfMSoxEyBpzGZvAFgYY9jxoZt+XHfCxFT4B2y4jMmg=",
+    "h1:oV5+AJoHWbr+heAwyeAscMsrvxhX90jcWDw44et1WP4=",
+    "h1:ozbSA+reOOOgjj4sIdAHpPgIoBE9GDfYslKOAOsnXzU=",
+    "h1:zKZDqJaHl4TqEEumEbe4I551A7DO4o3Guz3n+AVhj2s=",
+    "zh:6161a9a73c29be31d632d35a0f0560bdde6bb7a04086d3e882a1c661b6f69a83",
+    "zh:73d4034acc0337ef4ab2bc54eb0ce0f8aaf3f759a6819bbc54f0d65d2d343ca3",
+    "zh:8e731084c9fc4e763325b403ec6d8aa26026b6048c841f6530edab37a083938b",
+    "zh:93d64c561c698613d144955c52244be30d12fc61d3a0e46d9e0ff0b27d919939",
+    "zh:9b6b855680682842196cd482cdf137fd29755e67659cf15e8086694d7b78f197",
+    "zh:a1e09e50a4e9495dc9db0bf30dd14c526e86ec235a66d4e7707bfda99838c167",
+    "zh:a6f5ddec8e2d63ba804222eb952a6eef86bfac2ac105c57326406bf728578bdb",
+    "zh:faa983cd87822db38e7961fc2828453a7e6284669796e8851988010a8aed7796",
   ]
 }

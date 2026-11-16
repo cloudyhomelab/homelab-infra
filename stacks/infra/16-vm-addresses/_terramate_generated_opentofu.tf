@@ -9,7 +9,7 @@ terraform {
     }
     netbox = {
       source  = "e-breuninger/netbox"
-      version = "6.0.0"
+      version = "6.0.1"
     }
   }
   backend "s3" {
