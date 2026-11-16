@@ -29,6 +29,16 @@ jobs:
           permission-statuses: write
           permission-workflows: write
 
+      - name: OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: 1.13.9
+          tofu_wrapper: false
+
+      # Containerbase has no OpenTofu tool; the Renovate container mounts /tmp from the runner
+      - name: Expose tofu to Renovate
+        run: install -D "$(command -v tofu)" /tmp/renovate-tools/tofu
+
       - name: Renovate
         uses: renovatebot/github-action@acdd6bda8b035c99ce59d5675816af2aa65a1774 # v46.3.14
         with:
@@ -36,6 +46,7 @@ jobs:
           renovate-version: 44.243.1
         env:
           RENOVATE_REPOSITORIES: ${{ github.repository }}
+          RENOVATE_ALLOWED_COMMANDS: '["^/tmp/renovate-tools/tofu -chdir=stacks/[a-z0-9-]+/[a-z0-9-]+ init -backend=false -input=false$"]'
           RENOVATE_ONBOARDING: "false"
           # Commits through the API so GitHub signs them as the app
           RENOVATE_PLATFORM_COMMIT: enabled
