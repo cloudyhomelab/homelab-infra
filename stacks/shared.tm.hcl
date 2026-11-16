@@ -12,6 +12,7 @@ globals {
   reverse_zone          = "88.10.in-addr.arpa."
   truenas_app_data_root = "zpool0/cloudyhome_app_data"
   s3_url                = "http://moria.ip.cloudyhome.net:9000"
+  s3_region             = "home"
 
   # Keyed by the pve_type global each domain sets
   pve_endpoints = {

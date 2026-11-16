@@ -3,10 +3,6 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 # Apply order across failure domains
 domains := "level0 edge network infra apps"
 
-# S3 server holding state, passed to the backend and read by scripts/s3-state.sh
-state_endpoint := "http://moria.ip.cloudyhome.net:9000"
-state_region := "home"
-
 # Show this list
 default:
     @just --list
@@ -29,8 +25,6 @@ tofu stack +args:
     domain="${domain%%/*}"
     compgen -G "$dir/*.tf" >/dev/null || { echo "not a stack: {{ stack }} (see: just stacks)" >&2; exit 1; }
     source scripts/load-secrets.sh "$domain"
-    export TF_VAR_state_endpoint="{{ state_endpoint }}"
-    export TF_VAR_state_region="{{ state_region }}"
     exec tofu -chdir="$dir" {{ args }}
 
 # Initialise one stack's backend and providers

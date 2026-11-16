@@ -70,24 +70,16 @@ locals {
   state_backend = {
     bucket = "tofu-state-network"
     endpoints = {
-      s3 = var.state_endpoint
+      s3 = "http://moria.ip.cloudyhome.net:9000"
     }
-    region                      = var.state_region
-    use_path_style              = true
-    use_lockfile                = true
+    region                      = "home"
     skip_credentials_validation = true
-    skip_requesting_account_id  = true
     skip_metadata_api_check     = true
     skip_region_validation      = true
+    skip_requesting_account_id  = true
+    use_lockfile                = true
+    use_path_style              = true
   }
-}
-variable "state_endpoint" {
-  description = "URL of the S3 server holding state, set by the justfile."
-  type        = string
-}
-variable "state_region" {
-  description = "Region sent to the S3 server, set by the justfile."
-  type        = string
 }
 variable "state_passphrase" {
   ephemeral = true

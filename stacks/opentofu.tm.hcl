@@ -1,6 +1,8 @@
 globals {
   # One state bucket per domain: <prefix><domain>; scripts/s3-state.sh creates it
   state_bucket_prefix = "tofu-state-"
+  state_endpoint      = global.s3_url
+  state_region        = global.s3_region
 }
 
 generate_hcl "_terramate_generated_opentofu.tf" {
@@ -88,8 +90,8 @@ generate_hcl "_terramate_generated_opentofu.tf" {
       # Shared by the backend and terraform_remote_state reads of other stacks in the domain
       state_backend = {
         bucket                      = "${global.state_bucket_prefix}${let.domain}"
-        endpoints                   = { s3 = var.state_endpoint }
-        region                      = var.state_region
+        endpoints                   = { s3 = global.state_endpoint }
+        region                      = global.state_region
         use_path_style              = true
         use_lockfile                = true
         skip_credentials_validation = true
@@ -97,16 +99,6 @@ generate_hcl "_terramate_generated_opentofu.tf" {
         skip_metadata_api_check     = true
         skip_region_validation      = true
       }
-    }
-
-    variable "state_endpoint" {
-      description = "URL of the S3 server holding state, set by the justfile."
-      type        = string
-    }
-
-    variable "state_region" {
-      description = "Region sent to the S3 server, set by the justfile."
-      type        = string
     }
 
     variable "state_passphrase" {

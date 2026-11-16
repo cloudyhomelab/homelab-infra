@@ -29,9 +29,10 @@ cd "$REPO_DIR"
 domains="$(just --evaluate domains)"
 [[ " $domains " == *" $domain "* ]] || die "unknown domain '$domain' (known: $domains)"
 
-bucket="$(terramate -C stacks experimental get-config-value global.state_bucket_prefix)$domain"
-endpoint="$(just --evaluate state_endpoint)"
-region="$(just --evaluate state_region)"
+tm_global() { terramate -C stacks experimental get-config-value "global.$1"; }
+bucket="$(tm_global state_bucket_prefix)$domain"
+endpoint="$(tm_global state_endpoint)"
+region="$(tm_global state_region)"
 secrets="secrets/$domain.sops.yaml"
 
 # --profile outranks AWS_* credential variables, so a stray key in the shell cannot be used
