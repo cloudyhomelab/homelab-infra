@@ -3,6 +3,7 @@ stack {
   name        = "50-arr-stack"
   description = "Media automation server"
   tags        = ["dns", "keycloak", "proxmox"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/vms.yaml",
   ]

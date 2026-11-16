@@ -3,6 +3,7 @@ stack {
   name        = "18-dns-secondary"
   description = "Secondary authoritative DNS server"
   tags        = ["dns", "keycloak", "opnsense", "proxmox"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/vms.yaml",
   ]
