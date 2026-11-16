@@ -3,6 +3,7 @@ stack {
   name        = "17-storage"
   description = "TrueNAS datasets and NFS shares for all VMs in the environment"
   tags        = ["truenas"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/vms.yaml",
   ]

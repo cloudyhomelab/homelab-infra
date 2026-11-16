@@ -3,6 +3,7 @@ stack {
   name        = "00-proxmox-init"
   description = "Initial preparation steps for the Proxmox environment"
   tags        = ["proxmox-root", "time"]
+  after       = ["/stacks/edge", "/stacks/network"]
 }
 
 globals {

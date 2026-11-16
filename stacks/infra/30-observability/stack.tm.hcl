@@ -3,6 +3,7 @@ stack {
   name        = "30-observability"
   description = "Observability server"
   tags        = ["dns", "keycloak", "proxmox"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/vms.yaml",
   ]

@@ -3,6 +3,7 @@ stack {
   name        = "10-proxmox-base"
   description = "Prepare the Proxmox environment for deployments"
   tags        = ["proxmox"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/global-data/ipam.yaml",
   ]

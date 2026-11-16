@@ -3,4 +3,5 @@ stack {
   name        = "20-kea"
   description = "OPNsense Kea DHCPv4 subnets from the NetBox prefixes and ranges"
   tags        = ["netbox", "opnsense"]
+  after       = ["/stacks/edge"]
 }

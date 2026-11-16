@@ -3,6 +3,7 @@ stack {
   name        = "19-dns-resolver"
   description = "DNS resolver"
   tags        = ["dns", "keycloak", "proxmox"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/vms.yaml",
   ]

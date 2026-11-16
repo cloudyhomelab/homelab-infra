@@ -1,8 +1,5 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
-# Apply order across failure domains
-domains := "level0 edge network infra apps"
-
 # Show this list
 default:
     @just --list
@@ -11,10 +8,12 @@ default:
 stacks domain="":
     #!/usr/bin/env bash
     set -euo pipefail
-    for d in {{ if domain == "" { domains } else { domain } }}; do
-      [[ -d "stacks/$d" ]] || continue
-      terramate -C "stacks/$d" list --run-order | sed "s|^|$d/|"
-    done
+    if [[ -z "{{ domain }}" ]]; then
+      terramate -C stacks list --run-order
+    else
+      [[ -d "stacks/{{ domain }}" ]] || { echo "not a domain: {{ domain }}" >&2; exit 1; }
+      terramate -C "stacks/{{ domain }}" list --run-order | sed "s|^|{{ domain }}/|"
+    fi
 
 # Run any tofu command in a stack with the global and its domain's secrets loaded
 tofu stack +args:

@@ -3,6 +3,7 @@ stack {
   name        = "60-homeassistant"
   description = "Home Assistant server"
   tags        = ["dns", "keycloak", "proxmox"]
+  after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/vms.yaml",
   ]

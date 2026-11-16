@@ -26,8 +26,7 @@ command -v aws >/dev/null || die "aws CLI not found"
 
 cd "$REPO_DIR"
 
-domains="$(just --evaluate domains)"
-[[ " $domains " == *" $domain "* ]] || die "unknown domain '$domain' (known: $domains)"
+[[ "$domain" =~ ^[A-Za-z0-9_-]+$ && -d "stacks/$domain" ]] || die "unknown domain '$domain' (known: $(cd stacks && ls -d -- */ | tr -d / | xargs))"
 
 tm_global() { terramate -C stacks experimental get-config-value "global.$1"; }
 bucket="$(tm_global state_bucket_prefix)$domain"
