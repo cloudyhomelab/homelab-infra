@@ -2,6 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "enabledManagers": ["terraform", "custom.regex", "github-actions"],
+  "dependencyDashboard": true,
+  "semanticCommits": "enabled",
+  "platformCommit": "enabled",
+  "minimumReleaseAge": "3 days",
   "customManagers": [
     {
       "description": "Provider pins in the Terramate global. depName is the local name, as the terraform manager names it, so the generated copies and lock files land on the same branch and terramate generate shows no drift",
