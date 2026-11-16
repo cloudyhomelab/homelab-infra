@@ -3,33 +3,13 @@
 terraform {
   required_version = ">= 1.11.2"
   required_providers {
-    dns = {
-      source  = "hashicorp/dns"
-      version = "3.6.2"
-    }
-    keycloak = {
-      source  = "keycloak/keycloak"
-      version = "5.9.0"
-    }
-    netbox = {
-      source  = "e-breuninger/netbox"
-      version = "6.0.0"
-    }
-    opnsense = {
-      source  = "browningluke/opnsense"
-      version = "0.26.0"
+    http = {
+      source  = "hashicorp/http"
+      version = "3.6.3"
     }
     proxmox = {
       source  = "bpg/proxmox"
       version = "0.115.0"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "0.14.2"
-    }
-    truenas = {
-      source  = "truenas/truenas"
-      version = "1.9.0"
     }
   }
   backend "s3" {

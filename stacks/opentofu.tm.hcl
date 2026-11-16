@@ -3,6 +3,50 @@ globals {
   state_bucket_prefix = "tofu-state-"
   state_endpoint      = global.s3_url
   state_region        = global.s3_region
+
+  # A stack gets the providers whose tags it carries; proxmox-root stacks use the proxmox provider too
+  providers = {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.115.0"
+      tags    = ["proxmox", "proxmox-root"]
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.14.2"
+      tags    = ["time"]
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "3.6.3"
+      tags    = ["http"]
+    }
+    keycloak = {
+      source  = "keycloak/keycloak"
+      version = "5.9.0"
+      tags    = ["keycloak"]
+    }
+    dns = {
+      source  = "hashicorp/dns"
+      version = "3.6.2"
+      tags    = ["dns"]
+    }
+    netbox = {
+      source  = "e-breuninger/netbox"
+      version = "6.0.0"
+      tags    = ["netbox"]
+    }
+    opnsense = {
+      source  = "browningluke/opnsense"
+      version = "0.26.0"
+      tags    = ["opnsense"]
+    }
+    truenas = {
+      source  = "truenas/truenas"
+      version = "1.9.0"
+      tags    = ["truenas"]
+    }
+  }
 }
 
 generate_hcl "_terramate_generated_opentofu.tf" {
@@ -14,36 +58,13 @@ generate_hcl "_terramate_generated_opentofu.tf" {
     terraform {
       required_version = ">= 1.11.2"
 
-      # The one required_providers block per stack: OpenTofu allows no second one, so every
-      # provider used anywhere is pinned here, whether or not a stack uses it
-      required_providers {
-        proxmox = {
-          source  = "bpg/proxmox"
-          version = "0.115.0"
-        }
-        time = {
-          source  = "hashicorp/time"
-          version = "0.14.2"
-        }
-        keycloak = {
-          source  = "keycloak/keycloak"
-          version = "5.9.0"
-        }
-        dns = {
-          source  = "hashicorp/dns"
-          version = "3.6.2"
-        }
-        netbox = {
-          source  = "e-breuninger/netbox"
-          version = "6.0.0"
-        }
-        opnsense = {
-          source  = "browningluke/opnsense"
-          version = "0.26.0"
-        }
-        truenas = {
-          source  = "truenas/truenas"
-          version = "1.9.0"
+      # The one required_providers block per stack: OpenTofu allows no second one
+      tm_dynamic "required_providers" {
+        attributes = {
+          for name, p in global.providers : name => {
+            source  = p.source
+            version = p.version
+          } if tm_length(tm_setintersection(p.tags, terramate.stack.tags)) > 0
         }
       }
 
