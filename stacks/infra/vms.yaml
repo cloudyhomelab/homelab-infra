@@ -70,3 +70,9 @@ vms:
   homeassistant:
     image: debian/debian-homeassistant
     network: IoTNet
+
+  media:
+    image: debian/debian-media
+    network: LabNet
+    cores: 4
+    memory: 4096
