@@ -19,10 +19,23 @@ locals {
   ]...)
 
   allow_records = local.allow_data["allow"]
+
+  deny_records = [
+    for line in split("\n", data.http.deny_list.response_body) : trimspace(line)
+    if trimspace(line) != "" && !startswith(trimspace(line), "#")
+  ]
 }
 
-module "deny_list" {
-  source = "git::https://github.com/cloudyhomelab/dns-rpz-deny-list.git?ref=main"
+data "http" "deny_list" {
+  url = "https://raw.githubusercontent.com/cloudyhomelab/dns-rpz-deny-list/main/deny-list.txt"
+
+  lifecycle {
+    # An error page would parse as an empty list and delete every deny record
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Deny list fetch returned HTTP ${self.status_code}"
+    }
+  }
 }
 
 module "a_record" {
@@ -45,7 +58,7 @@ module "rpz" {
     allow_zone = local.allow_zone
     deny_zone  = local.deny_zone
     allow      = local.allow_records
-    deny       = module.deny_list.deny
+    deny       = local.deny_records
     ttl        = local.ttl
   }
 }
