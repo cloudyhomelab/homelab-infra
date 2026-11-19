@@ -1,0 +1,3 @@
+---
+# Names exempt from the RPZ deny list, written to the rpz.allow zone by this stack.
+allow: []

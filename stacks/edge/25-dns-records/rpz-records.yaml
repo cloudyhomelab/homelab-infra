@@ -1,8 +1,0 @@
----
-# Response policy (RPZ) lists, written to the rpz.deny and rpz.allow zones by this stack.
-# deny: domains, subdomains included - to be rejected
-# allow: names exempt from deny
-deny:
-  - flightnetwork.com
-
-allow: []

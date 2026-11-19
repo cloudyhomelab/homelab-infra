@@ -5,8 +5,8 @@ locals {
   allow_zone = "rpz.allow"
   deny_zone  = "rpz.deny"
 
-  zones    = yamldecode(file("${path.module}/../bootstrap-static-dns.yaml"))
-  rpz_data = yamldecode(file("${path.module}/rpz-records.yaml"))
+  zones      = yamldecode(file("${path.module}/../bootstrap-static-dns.yaml"))
+  allow_data = yamldecode(file("${path.module}/rpz-allow.yaml"))
 
   records = merge([
     for zone, names in local.zones : {
@@ -18,8 +18,11 @@ locals {
     }
   ]...)
 
-  deny_records  = local.rpz_data["deny"]
-  allow_records = local.rpz_data["allow"]
+  allow_records = local.allow_data["allow"]
+}
+
+module "deny_list" {
+  source = "git::https://github.com/cloudyhomelab/dns-rpz-deny-list.git?ref=main"
 }
 
 module "a_record" {
@@ -42,7 +45,7 @@ module "rpz" {
     allow_zone = local.allow_zone
     deny_zone  = local.deny_zone
     allow      = local.allow_records
-    deny       = local.deny_records
+    deny       = module.deny_list.deny
     ttl        = local.ttl
   }
 }
