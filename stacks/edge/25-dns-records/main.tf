@@ -5,8 +5,8 @@ locals {
   allow_zone = "rpz.allow"
   deny_zone  = "rpz.deny"
 
-  zones    = yamldecode(file("${path.module}/../bootstrap-static-dns.yaml"))
-  rpz_data = yamldecode(file("${path.module}/rpz-records.yaml"))
+  zones      = yamldecode(file("${path.module}/../bootstrap-static-dns.yaml"))
+  allow_data = yamldecode(file("${path.module}/rpz-allow.yaml"))
 
   records = merge([
     for zone, names in local.zones : {
@@ -18,8 +18,24 @@ locals {
     }
   ]...)
 
-  deny_records  = local.rpz_data["deny"]
-  allow_records = local.rpz_data["allow"]
+  allow_records = local.allow_data["allow"]
+
+  deny_records = [
+    for line in split("\n", data.http.deny_list.response_body) : trimspace(line)
+    if trimspace(line) != "" && !startswith(trimspace(line), "#")
+  ]
+}
+
+data "http" "deny_list" {
+  url = "https://raw.githubusercontent.com/cloudyhomelab/dns-rpz-deny-list/main/deny-list.txt"
+
+  lifecycle {
+    # An error page would parse as an empty list and delete every deny record
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Deny list fetch returned HTTP ${self.status_code}"
+    }
+  }
 }
 
 module "a_record" {
