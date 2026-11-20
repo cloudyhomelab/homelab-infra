@@ -43,7 +43,7 @@ globals {
     }
     truenas = {
       source  = "truenas/truenas"
-      version = "1.9.1"
+      version = "1.9.3"
       tags    = ["truenas"]
     }
   }
