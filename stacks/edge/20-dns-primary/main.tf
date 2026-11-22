@@ -14,7 +14,7 @@ locals {
       local.vm_defaults,
       local.vms.defaults,
       { name = key },
-      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "network"], field) },
+      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "image_version", "network"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
     )
   }

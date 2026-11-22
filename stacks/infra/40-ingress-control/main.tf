@@ -19,7 +19,7 @@ locals {
   vm_config = {
     for key in ["mgmt-ctl", "lab-ctl", "iot-ctl"] : key => merge(
       local.vm_defaults,
-      { for field, value in local.vm[key] : field => value if !contains(["image", "network"], field) },
+      { for field, value in local.vm[key] : field => value if !contains(["image", "image_version", "network"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
       {
         # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
@@ -34,7 +34,7 @@ locals {
   edge_vm_config = {
     for key in ["edge-ctl"] : key => merge(
       local.vm_defaults,
-      { for field, value in local.vm[key] : field => value if !contains(["image", "network"], field) },
+      { for field, value in local.vm[key] : field => value if !contains(["image", "image_version", "network"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
       {
         # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones

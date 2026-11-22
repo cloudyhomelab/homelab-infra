@@ -17,7 +17,7 @@ locals {
   vm_config = {
     for key, vm in local.vm : key => merge(
       local.vm_defaults,
-      { for field, value in vm : field => value if !contains(["image", "network"], field) },
+      { for field, value in vm : field => value if !contains(["image", "image_version", "network"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[vm.network] },
       {
         # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
