@@ -7,6 +7,10 @@ terraform {
       source  = "hashicorp/dns"
       version = "3.6.2"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "3.6.3"
+    }
     keycloak = {
       source  = "keycloak/keycloak"
       version = "5.10.0"
