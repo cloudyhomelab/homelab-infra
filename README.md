@@ -59,7 +59,7 @@ Generated files (`_terramate_generated_*`) are never edited by hand; the `terram
 
 - `main.tf`: resources and module calls.
   - Read another stack's outputs with `terraform_remote_state`, `config = merge(local.state_backend, { key = "<stack>.tfstate" })`.
-  - For a VM, pick its key from `../vms.yaml` and read `10-proxmox-base` (bridges) and `15-image-catalog` (images); see an existing VM stack.
+  - For a VM, pick its key from `../vms.yaml`, read `10-proxmox-base` (bridges) and resolve its pinned image with `cloudyhome-image-index`, downloaded by `cloudyhome-proxmox-image`; see an existing VM stack.
 - `variables.tf`: only variables no generated file declares.
 - `outputs.tf`, `locals.tf` as needed.
 - Data files:

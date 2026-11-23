@@ -1,9 +1,8 @@
 ---
-# Every VM of the domain. Read by 15-image-catalog, which fetches the images named here, by
-# 16-vm-addresses, by the VM stacks, which pick theirs by key, and by
-# 17-storage.
+# Every VM of the domain. Read by 16-vm-addresses, by the VM stacks, which pick theirs by key and
+# download its pinned image, and by 17-storage, which provisions what each pinned image needs.
 # defaults: config fields every VM gets unless it sets its own.
-# vms: key => image (catalog key <os>/<type>), image_version (pinned BUILD_VERSION from the image's index),
+# vms: key => image (index key <os>/<type>), image_version (pinned BUILD_VERSION from the image's index),
 #   network (VLAN of global-data/ipam.yaml, resolved to a bridge by 10-proxmox-base) plus the module's other
 #   config fields; name defaults to the key.
 # Unless dhcp is true, 16-vm-addresses registers the VM's address in NetBox and, unless create_dns_record
