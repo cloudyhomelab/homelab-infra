@@ -102,6 +102,33 @@ plan-domain domain:
 apply-domain domain:
     just domain-run {{ domain }} -- tofu apply
 
+# Copy a domain's S3 key from the storage domain into its secrets file; creates its state passphrase once
+s3-key domain:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ -d "stacks/{{ domain }}" ]] || { echo "not a domain: {{ domain }}" >&2; exit 1; }
+    # The storage domain authenticates with the S3 admin credentials it manages everything else with
+    [[ "{{ domain }}" != storage ]] || { echo "storage uses the S3 admin credentials; set them with: just secrets storage" >&2; exit 1; }
+    secrets="secrets/{{ domain }}.sops.yaml"
+    passphrase_bytes=32
+    keys="$(just tofu storage/10-s3-access output -json s3_keys)"
+    jq -e --arg d "{{ domain }}" 'has($d)' <<<"$keys" >/dev/null \
+      || { echo "no S3 key for {{ domain }}; add it to stacks/storage/s3-access.yaml and apply storage/10-s3-access" >&2; exit 1; }
+    if [[ ! -f "$secrets" ]]; then
+      empty="$(mktemp --suffix=.yaml)"
+      echo '{}' >"$empty"
+      sops encrypt --filename-override "$secrets" "$empty" >"$secrets"
+      rm -f "$empty"
+    fi
+    jq --arg d "{{ domain }}" '.[$d].access_key' <<<"$keys" | sops set --idempotent --value-stdin "$secrets" '["AWS_ACCESS_KEY_ID"]'
+    jq --arg d "{{ domain }}" '.[$d].secret_key' <<<"$keys" | sops set --idempotent --value-stdin "$secrets" '["AWS_SECRET_ACCESS_KEY"]'
+    # Created once: a new passphrase makes the domain's existing state unreadable
+    if ! sops decrypt --extract '["TF_VAR_state_passphrase"]' "$secrets" >/dev/null 2>&1; then
+      openssl rand -base64 "$passphrase_bytes" | jq -R . | sops set --value-stdin "$secrets" '["TF_VAR_state_passphrase"]'
+      echo "created TF_VAR_state_passphrase in $secrets"
+    fi
+    echo "S3 key of {{ domain }} written to $secrets"
+
 # Edit a domain's secrets file
 secrets domain:
     mkdir -p secrets
