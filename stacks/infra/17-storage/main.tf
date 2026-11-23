@@ -3,6 +3,8 @@ locals {
   vm  = { for key, settings in local.vms.vms : key => merge(local.vms.defaults, settings) }
 
   addresses = data.terraform_remote_state.vm_addresses.outputs.addresses
+
+  dhcp_with_storage = sort([for key, vm in local.vm : key if vm.dhcp && length(module.image_index[key].storage) > 0])
 }
 
 data "terraform_remote_state" "vm_addresses" {
@@ -24,18 +26,10 @@ module "storage" {
 
   root = var.truenas_app_data_root
 
-  # Keyed by image type: two entries of one type in a domain fail here as a duplicate key
-  images = {
-    for key, vm in local.vm : vm.image => {
-      type    = split("/", vm.image)[1]
-      storage = module.image_index[key].storage
-    }
-  }
-
   clients = {
     for key, vm in local.vm : key => {
-      image   = vm.image
-      address = vm.dhcp ? null : try(split("/", local.addresses[key].ip4_address_cidr)[0], null)
+      storage = module.image_index[key].storage
+      address = vm.dhcp ? null : split("/", local.addresses[key].ip4_address_cidr)[0]
     }
   }
 }
@@ -43,4 +37,9 @@ module "storage" {
 output "shares" {
   description = "<app>/<dataset> => dataset name, share path and allowed hosts."
   value       = module.storage.shares
+
+  precondition {
+    condition     = length(local.dhcp_with_storage) == 0
+    error_message = "VMs ${join(", ", local.dhcp_with_storage)} use DHCP but their images need storage; shares allow hosts by static address only."
+  }
 }
