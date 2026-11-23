@@ -1,17 +1,17 @@
 locals {
-  vms = yamldecode(file("${path.module}/../vms.yaml"))
-  vm  = { for key, settings in local.vms.vms : key => merge(local.vms.defaults, settings) }
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
+  workload  = { for key, settings in local.workloads.workloads : key => merge(local.workloads.defaults, settings) }
 
-  dhcp_with_storage = sort([for key, vm in local.vm : key if vm.dhcp && length(module.image_index[key].storage) > 0])
+  dhcp_with_storage = sort([for key, workload in local.workload : key if workload.create_vm && workload.dhcp && length(module.image_index[key].storage) > 0])
 }
 
 module "image_index" {
   source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-image-index?ref=main"
-  for_each = local.vm
+  for_each = local.workload
 
   index_base_url = local.image_index_url
-  image          = local.vms.vms[each.key].image
-  image_version  = local.vms.vms[each.key].image_version
+  image          = local.workloads.workloads[each.key].image
+  image_version  = local.workloads.workloads[each.key].image_version
 }
 
 module "storage" {
@@ -20,9 +20,9 @@ module "storage" {
   root = var.truenas_app_data_root
 
   clients = {
-    for key, vm in local.vm : key => {
+    for key, workload in local.workload : key => {
       storage = module.image_index[key].storage
-      address = vm.dhcp ? null : split("/", vm.ip4_address_cidr)[0]
+      address = workload.create_vm && !workload.dhcp ? split("/", workload.ip4_address_cidr)[0] : null
     }
   }
 }

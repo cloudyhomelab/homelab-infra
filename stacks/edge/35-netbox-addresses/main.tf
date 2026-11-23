@@ -1,6 +1,6 @@
 locals {
-  zones = yamldecode(file("${path.module}/../bootstrap-static-dns.yaml"))
-  vms   = yamldecode(file("${path.module}/../vms.yaml"))
+  zones     = yamldecode(file("${path.module}/../bootstrap-static-dns.yaml"))
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
 
   # The file, not NetBox: network/10-ipam creates the prefixes after this domain, and NetBox nests
   # addresses under prefixes by containment whenever they appear
@@ -26,10 +26,10 @@ locals {
   ])
 
   vm_records = [
-    for key, vm in local.vms.vms : {
+    for key, vm in local.workloads.workloads : {
       address  = split("/", vm.ip4_address_cidr)[0]
       dns_name = "${try(vm.name, key)}.${var.dns_zone}"
-    } if !merge(local.vms.defaults, vm).dhcp
+    } if merge(local.workloads.defaults, vm).create_vm && !merge(local.workloads.defaults, vm).dhcp
   ]
 
   # NetBox keeps one DNS name per address; a second name for the same address fails here as a duplicate key

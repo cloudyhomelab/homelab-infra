@@ -4,7 +4,7 @@ stack {
   description = "DNS resolver"
   tags        = ["dns", "http", "keycloak", "proxmox"]
   watch = [
-    "/stacks/edge/vms.yaml",
+    "/stacks/edge/workloads.yaml",
   ]
 }
 

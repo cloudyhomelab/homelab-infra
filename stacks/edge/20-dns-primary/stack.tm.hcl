@@ -4,7 +4,7 @@ stack {
   description = "Primary authoritative DNS server"
   tags        = ["dns", "http", "keycloak", "opnsense", "proxmox"]
   watch = [
-    "/stacks/edge/vms.yaml",
+    "/stacks/edge/workloads.yaml",
   ]
 }
 

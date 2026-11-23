@@ -1,12 +1,10 @@
 locals {
-  vms = yamldecode(file("${path.module}/../vms.yaml"))
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
 
   # Reserved here, ahead of the VM stacks, so 17-storage can allow each VM on its NFS shares by address
   # and the address survives rebuilding the VM
-  vm = {
-    for key, settings in local.vms.vms : key => merge(local.vms.defaults, { name = key }, settings)
-    if !merge(local.vms.defaults, settings).dhcp
-  }
+  workload = { for key, settings in local.workloads.workloads : key => merge(local.workloads.defaults, { name = key }, settings) }
+  vm       = { for key, workload in local.workload : key => workload if workload.create_vm && !workload.dhcp }
 }
 
 module "address" {

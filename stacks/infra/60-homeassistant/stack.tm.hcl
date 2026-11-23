@@ -5,7 +5,7 @@ stack {
   tags        = ["dns", "http", "keycloak", "proxmox"]
   after       = ["/stacks/edge", "/stacks/network"]
   watch = [
-    "/stacks/infra/vms.yaml",
+    "/stacks/infra/workloads.yaml",
   ]
 }
 
