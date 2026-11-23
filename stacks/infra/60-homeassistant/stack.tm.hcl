@@ -2,7 +2,7 @@ stack {
   id          = "923f67ad-8627-4c5c-b735-71a8c1f11156"
   name        = "60-homeassistant"
   description = "Home Assistant server"
-  tags        = ["dns", "http", "keycloak", "proxmox"]
+  tags        = ["aws", "dns", "http", "keycloak", "proxmox"]
   after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/workloads.yaml",
@@ -10,5 +10,5 @@ stack {
 }
 
 globals {
-  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url"]
+  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url", "image_pin"]
 }

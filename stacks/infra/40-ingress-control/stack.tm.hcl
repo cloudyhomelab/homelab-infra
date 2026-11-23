@@ -2,7 +2,7 @@ stack {
   id          = "cdad65fe-1c95-43af-bf80-475f3da65cb7"
   name        = "40-ingress-control"
   description = "Ingress controllers, one per network"
-  tags        = ["dns", "http", "keycloak", "proxmox"]
+  tags        = ["aws", "dns", "http", "keycloak", "proxmox"]
   after       = ["/stacks/edge", "/stacks/network"]
   watch = [
     "/stacks/infra/workloads.yaml",
@@ -10,5 +10,5 @@ stack {
 }
 
 globals {
-  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url"]
+  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url", "image_pin"]
 }
