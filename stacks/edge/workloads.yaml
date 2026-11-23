@@ -3,15 +3,15 @@
 # create_vm: false keeps the storage and drops the VM and its address.
 defaults:
   node: pve-lab-1
+  dhcp: false
   create_vm: true
 
 workloads:
   dns-primary:
     image: debian/debian-dns-primary
-    image_version: "20261122-1754"
+    image_version: "20261123-0027"
     name: ns1
     network: DNSNet
-    dhcp: false
     ip4_address_cidr: 10.88.53.11/28
     gateway: 10.88.53.1
     dns_addresses: [10.88.53.1]
@@ -19,9 +19,8 @@ workloads:
 
   resolver1:
     image: debian/debian-dns-resolver
-    image_version: "20261122-1624"
+    image_version: "20261123-0028"
     network: DNSNet
-    dhcp: false
     ip4_address_cidr: 10.88.53.3/28
     gateway: 10.88.53.1
     dns_addresses: [10.88.53.1]
@@ -29,9 +28,8 @@ workloads:
 
   netbox:
     image: debian/debian-netbox
-    image_version: "20261122-1626"
+    image_version: "20261123-0051"
     network: LabNet
-    dhcp: false
     ip4_address_cidr: 10.88.16.10/24
     gateway: 10.88.16.1
     dns_addresses: [10.88.16.1]
