@@ -1,5 +1,5 @@
 locals {
-  vms = yamldecode(file("${path.module}/../vms.yaml"))
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
 
   vm_defaults = {
     username     = var.vm_username
@@ -8,15 +8,16 @@ locals {
     searchdomain = var.dns_zone
   }
 
-  # Keys of ../vms.yaml created here => module config
+  # Keys of ../workloads.yaml created here => module config
   vm_config = {
     for key in ["dns-primary"] : key => merge(
       local.vm_defaults,
-      local.vms.defaults,
+      local.workloads.defaults,
       { name = key },
-      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "image_version", "network"], field) },
-      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
+      { for field, value in local.workloads.workloads[key] : field => value if !contains(["image", "image_version", "network", "create_vm"], field) },
+      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.workloads.workloads[key].network] },
     )
+    if merge(local.workloads.defaults, local.workloads.workloads[key]).create_vm
   }
 
   forward_zones = toset([trimsuffix(var.dns_zone, "."), trimsuffix(var.reverse_zone, ".")])
@@ -32,8 +33,8 @@ module "image_index" {
   for_each = local.vm_config
 
   index_base_url = local.image_index_url
-  image          = local.vms.vms[each.key].image
-  image_version  = local.vms.vms[each.key].image_version
+  image          = local.workloads.workloads[each.key].image
+  image_version  = local.workloads.workloads[each.key].image_version
 }
 
 module "image" {
@@ -62,7 +63,7 @@ module "vm" {
 }
 
 resource "opnsense_unbound_forward" "this" {
-  for_each = local.forward_zones
+  for_each = length(local.vm_config) > 0 ? local.forward_zones : toset([])
 
   domain    = each.key
   server_ip = module.vm["dns-primary"].vm_ipv4_address

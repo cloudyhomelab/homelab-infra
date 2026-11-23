@@ -6,7 +6,7 @@ stack {
   watch = [
     "/global-data/ipam.yaml",
     "/stacks/edge/bootstrap-static-dns.yaml",
-    "/stacks/edge/vms.yaml",
+    "/stacks/edge/workloads.yaml",
   ]
 }
 

@@ -4,7 +4,7 @@ stack {
   description = "NetBox, the IPAM source of truth"
   tags        = ["dns", "http", "keycloak", "proxmox"]
   watch = [
-    "/stacks/edge/vms.yaml",
+    "/stacks/edge/workloads.yaml",
   ]
 }
 

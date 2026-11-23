@@ -1,8 +1,11 @@
 locals {
-  vms = yamldecode(file("${path.module}/../vms.yaml"))
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
 
-  # Keys of ../vms.yaml created here => settings with the domain defaults
-  vm = { for key in ["observability"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
+  # Keys of ../workloads.yaml created here => settings with the domain defaults
+  vm = {
+    for key in ["observability"] : key => merge(local.workloads.defaults, { name = key }, local.workloads.workloads[key])
+    if merge(local.workloads.defaults, local.workloads.workloads[key]).create_vm
+  }
 
   addresses = data.terraform_remote_state.vm_addresses.outputs.addresses
 
@@ -17,7 +20,7 @@ locals {
   vm_config = {
     for key, vm in local.vm : key => merge(
       local.vm_defaults,
-      { for field, value in vm : field => value if !contains(["image", "image_version", "network"], field) },
+      { for field, value in vm : field => value if !contains(["image", "image_version", "network", "create_vm"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[vm.network] },
       {
         # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
@@ -45,8 +48,8 @@ module "image_index" {
   for_each = local.vm_config
 
   index_base_url = local.image_index_url
-  image          = local.vms.vms[each.key].image
-  image_version  = local.vms.vms[each.key].image_version
+  image          = local.workloads.workloads[each.key].image
+  image_version  = local.workloads.workloads[each.key].image_version
 }
 
 module "image" {

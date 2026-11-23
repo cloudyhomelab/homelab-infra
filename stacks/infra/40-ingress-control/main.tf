@@ -1,8 +1,11 @@
 locals {
-  vms = yamldecode(file("${path.module}/../vms.yaml"))
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
 
-  # Keys of ../vms.yaml created here => settings with the domain defaults
-  vm = { for key in ["mgmt-ctl", "lab-ctl", "iot-ctl", "edge-ctl"] : key => merge(local.vms.defaults, { name = key }, local.vms.vms[key]) }
+  # Keys of ../workloads.yaml created here => settings with the domain defaults
+  vm = {
+    for key in ["mgmt-ctl", "lab-ctl", "iot-ctl", "edge-ctl"] : key => merge(local.workloads.defaults, { name = key }, local.workloads.workloads[key])
+    if merge(local.workloads.defaults, local.workloads.workloads[key]).create_vm
+  }
 
   addresses = data.terraform_remote_state.vm_addresses.outputs.addresses
 
@@ -17,9 +20,9 @@ locals {
   # Keys of local.vm => module config; edge-ctl separate for its depends_on,
   # which cannot point at sibling for_each instances
   vm_config = {
-    for key in ["mgmt-ctl", "lab-ctl", "iot-ctl"] : key => merge(
+    for key in keys(local.vm) : key => merge(
       local.vm_defaults,
-      { for field, value in local.vm[key] : field => value if !contains(["image", "image_version", "network"], field) },
+      { for field, value in local.vm[key] : field => value if !contains(["image", "image_version", "network", "create_vm"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
       {
         # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
@@ -29,12 +32,13 @@ locals {
         dns_addresses     = local.vm[key].dhcp ? [] : local.addresses[key].dns_addresses
       },
     )
+    if key != "edge-ctl"
   }
 
   edge_vm_config = {
-    for key in ["edge-ctl"] : key => merge(
+    for key in keys(local.vm) : key => merge(
       local.vm_defaults,
-      { for field, value in local.vm[key] : field => value if !contains(["image", "image_version", "network"], field) },
+      { for field, value in local.vm[key] : field => value if !contains(["image", "image_version", "network", "create_vm"], field) },
       { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vm[key].network] },
       {
         # 16-vm-addresses records static VMs in DNS; the module records only DHCP ones
@@ -44,6 +48,7 @@ locals {
         dns_addresses     = local.vm[key].dhcp ? [] : local.addresses[key].dns_addresses
       },
     )
+    if key == "edge-ctl"
   }
 }
 
@@ -62,8 +67,8 @@ module "image_index" {
   for_each = merge(local.vm_config, local.edge_vm_config)
 
   index_base_url = local.image_index_url
-  image          = local.vms.vms[each.key].image
-  image_version  = local.vms.vms[each.key].image_version
+  image          = local.workloads.workloads[each.key].image
+  image_version  = local.workloads.workloads[each.key].image_version
 }
 
 module "image" {

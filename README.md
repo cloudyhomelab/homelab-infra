@@ -9,7 +9,7 @@ A stack is a directory under `stacks/<domain>/`. Terramate generates the backend
 ```sh
 terramate create stacks/<domain>/40-foo \
   --description "What it manages" \
-  --watch /stacks/<domain>/vms.yaml \
+  --watch /stacks/<domain>/workloads.yaml \
   --no-generate
 ```
 
@@ -59,11 +59,11 @@ Generated files (`_terramate_generated_*`) are never edited by hand; the `terram
 
 - `main.tf`: resources and module calls.
   - Read another stack's outputs with `terraform_remote_state`, `config = merge(local.state_backend, { key = "<stack>.tfstate" })`.
-  - For a VM, pick its key from `../vms.yaml`, read `10-proxmox-base` (bridges) and resolve its pinned image with `cloudyhome-image-index`, downloaded by `cloudyhome-proxmox-image`; see an existing VM stack.
+  - For a VM, pick its key from `../workloads.yaml` and skip it while `create_vm` is false, read `10-proxmox-base` (bridges) and resolve its pinned image with `cloudyhome-image-index`, downloaded by `cloudyhome-proxmox-image`; see an existing VM stack.
 - `variables.tf`: only variables no generated file declares.
 - `outputs.tf`, `locals.tf` as needed.
 - Data files:
-  - A new VM gets an entry in `stacks/<domain>/vms.yaml`.
+  - A new workload gets an entry in `stacks/<domain>/workloads.yaml`.
   - A new address goes in `global-data/ipam.yaml` if needed.
 - Secrets: `just secrets <domain>`, keyed `TF_VAR_<variable>`; `scripts/load-secrets.sh` exports them.
 

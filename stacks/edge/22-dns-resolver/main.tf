@@ -1,5 +1,5 @@
 locals {
-  vms = yamldecode(file("${path.module}/../vms.yaml"))
+  workloads = yamldecode(file("${path.module}/../workloads.yaml"))
 
   vm_defaults = {
     username     = var.vm_username
@@ -9,15 +9,16 @@ locals {
     reverse_zone = var.reverse_zone
   }
 
-  # Keys of ../vms.yaml created here => module config
+  # Keys of ../workloads.yaml created here => module config
   vm_config = {
     for key in ["resolver1"] : key => merge(
       local.vm_defaults,
-      local.vms.defaults,
+      local.workloads.defaults,
       { name = key },
-      { for field, value in local.vms.vms[key] : field => value if !contains(["image", "image_version", "network", "netbox"], field) },
-      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.vms.vms[key].network] },
+      { for field, value in local.workloads.workloads[key] : field => value if !contains(["image", "image_version", "network", "create_vm", "netbox"], field) },
+      { bridge = data.terraform_remote_state.proxmox_base.outputs.bridges[local.workloads.workloads[key].network] },
     )
+    if merge(local.workloads.defaults, local.workloads.workloads[key]).create_vm
   }
 }
 
@@ -31,8 +32,8 @@ module "image_index" {
   for_each = local.vm_config
 
   index_base_url = local.image_index_url
-  image          = local.vms.vms[each.key].image
-  image_version  = local.vms.vms[each.key].image_version
+  image          = local.workloads.workloads[each.key].image
+  image_version  = local.workloads.workloads[each.key].image_version
 }
 
 module "image" {

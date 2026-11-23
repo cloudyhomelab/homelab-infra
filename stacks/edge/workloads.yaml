@@ -1,15 +1,11 @@
 ---
-# Every VM of the domain. Read by the VM stacks, which pick theirs by key and download its pinned
-# image, by 17-storage, which provisions what each pinned image needs, and by 35-netbox-addresses,
-# which writes the static addresses to NetBox.
-# defaults: config fields every VM gets unless it sets its own.
-# vms: key => image (index key <os>/<type>), image_version (pinned BUILD_VERSION from the image's index),
-#   network (VLAN of global-data/ipam.yaml, resolved to a bridge by 10-proxmox-base) plus the module's other
-#   config fields; name defaults to the key.
+# image: index key <os>/<type>; image_version: its pinned BUILD_VERSION; network: VLAN of global-data/ipam.yaml.
+# create_vm: false keeps the storage and drops the VM and its address.
 defaults:
   node: pve-lab-1
+  create_vm: true
 
-vms:
+workloads:
   dns-primary:
     image: debian/debian-dns-primary
     image_version: "20261122-1754"
