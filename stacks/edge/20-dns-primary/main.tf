@@ -41,7 +41,7 @@ resource "aws_s3_object" "image_pin" {
   for_each = module.image_index
 
   bucket       = local.image_pin.bucket
-  key          = "${local.image_pin.prefix}/${each.key}.json"
+  key          = "${local.image_pin.prefix}/${local.image_pin.domain}/${each.key}.json"
   content_type = "application/json"
   content = jsonencode({
     image         = local.workloads.workloads[each.key].image

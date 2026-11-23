@@ -23,6 +23,7 @@ locals {
 locals {
   image_pin = {
     bucket = "os-image-staging"
-    prefix = "protected/edge"
+    domain = "edge"
+    prefix = "protected"
   }
 }

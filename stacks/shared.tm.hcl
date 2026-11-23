@@ -194,10 +194,11 @@ generate_hcl "_terramate_generated_shared.tf" {
     tm_dynamic "locals" {
       condition = tm_contains(global.uses, "image_pin")
       content {
-        # VM stacks write one object per workload under prefix: <domain>/<workload>.json
+        # One object per workload at <bucket>/<prefix>/<domain>/<workload>.json
         image_pin = {
           bucket = global.image_bucket
-          prefix = "${global.image_pin_prefix}/${tm_basename(tm_dirname(terramate.stack.path.absolute))}"
+          prefix = global.image_pin_prefix
+          domain = tm_basename(tm_dirname(terramate.stack.path.absolute))
         }
       }
     }

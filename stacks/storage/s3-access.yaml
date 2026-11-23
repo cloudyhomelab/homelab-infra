@@ -1,7 +1,10 @@
 ---
 # Domains whose state lives in tofu-state-<domain>. Each gets the S3 user tofu-<domain>, allowed into
 # its own bucket only; storage itself uses the S3 admin credentials.
+# image_pins: also allowed to write the domain's image pins (image_pin_prefix/<domain>/ in image_bucket).
 domains:
-  edge: {}
+  edge:
+    image_pins: true
   network: {}
-  infra: {}
+  infra:
+    image_pins: true
