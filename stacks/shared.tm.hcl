@@ -15,7 +15,9 @@ globals {
   s3_ssl                = false
   s3_url                = "${global.s3_ssl ? "https" : "http"}://${global.s3_host}"
   s3_region             = "home"
-  image_index_url       = "${global.s3_url}/os-image-staging"
+  image_bucket          = "os-image-staging"
+  image_pin_prefix      = "protected"
+  image_index_url       = "${global.s3_url}/${global.image_bucket}"
 
   # Keyed by the pve_type global each domain sets
   pve_endpoints = {
@@ -39,6 +41,7 @@ globals {
     "s3_url",
     "image_index_url",
     "state_bucket_prefix",
+    "image_pin",
     "acme_dns",
   ]
 }
@@ -185,6 +188,18 @@ generate_hcl "_terramate_generated_shared.tf" {
       condition = tm_contains(global.uses, "state_bucket_prefix")
       content {
         state_bucket_prefix = global.state_bucket_prefix
+      }
+    }
+
+    tm_dynamic "locals" {
+      condition = tm_contains(global.uses, "image_pin")
+      content {
+        # One object per workload at <bucket>/<prefix>/<domain>/<workload>.json
+        image_pin = {
+          bucket = global.image_bucket
+          prefix = global.image_pin_prefix
+          domain = tm_basename(tm_dirname(terramate.stack.path.absolute))
+        }
       }
     }
 

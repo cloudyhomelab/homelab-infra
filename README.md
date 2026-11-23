@@ -36,7 +36,7 @@ globals {
 ```
 
 - `tags`: each one adds a provider and its wiring.
-  - Tags: `proxmox`, `proxmox-root` (only for `00-proxmox-init`), `time`, `http`, `keycloak`, `dns`, `netbox`, `opnsense`, `truenas`, `minio` (S3 admin, only for `storage/10-s3-access`).
+  - Tags: `proxmox`, `proxmox-root` (only for `00-proxmox-init`), `time`, `http`, `keycloak`, `dns`, `netbox`, `opnsense`, `truenas`, `aws` (S3 only, on the lab's S3 server, with the domain's S3 key), `minio` (S3 admin, only for `storage/10-s3-access`).
   - Provider versions are in `stacks/opentofu.tm.hcl`.
 - `uses`: entries from `shared_entries` in `stacks/shared.tm.hcl`; an unknown name fails an assert.
 
@@ -60,6 +60,7 @@ Generated files (`_terramate_generated_*`) are never edited by hand; the `terram
 - `main.tf`: resources and module calls.
   - Read another stack's outputs with `terraform_remote_state`, `config = merge(local.state_backend, { key = "<stack>.tfstate" })`.
   - For a VM, pick its key from `../workloads.yaml` and skip it while `create_vm` is false, read `10-proxmox-base` (bridges) and resolve its pinned image with `cloudyhome-image-index`, downloaded by `cloudyhome-proxmox-image`; see an existing VM stack.
+  - Each pinned image is also written to `<image_bucket>/<image_pin_prefix>/<domain>/<workload>.json` (`image`, `image_version`, `image_url`) by an `aws_s3_object`; image pruning keeps every build listed there. Needs the `aws` tag, `image_pin` in `uses` and `image_pins: true` for the domain in `stacks/storage/s3-access.yaml`.
 - `variables.tf`: only variables no generated file declares.
 - `outputs.tf`, `locals.tf` as needed.
 - Data files:
@@ -78,7 +79,7 @@ just lint
 
 ## S3 access
 
-`stacks/storage/10-s3-access` owns every state bucket `tofu-state-<domain>` (versioned) and, per domain, the S3 user `tofu-<domain>` with a policy for its own bucket. It authenticates with the S3 admin credentials; every other domain only gets its own key.
+`stacks/storage/10-s3-access` owns every state bucket `tofu-state-<domain>` (versioned) and, per domain, the S3 user `tofu-<domain>` with a policy for its own bucket and, with `image_pins`, its image pins. It authenticates with the S3 admin credentials; every other domain only gets its own key.
 
 ### Give a domain its key
 

@@ -10,5 +10,5 @@ stack {
 }
 
 globals {
-  uses = ["state_bucket_prefix"]
+  uses = ["state_bucket_prefix", "image_pin"]
 }

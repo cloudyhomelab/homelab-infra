@@ -41,6 +41,11 @@ globals {
       version = "0.26.0"
       tags    = ["opnsense"]
     }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "6.73.0"
+      tags    = ["aws"]
+    }
     minio = {
       source  = "aminueza/minio"
       version = "3.46.4"

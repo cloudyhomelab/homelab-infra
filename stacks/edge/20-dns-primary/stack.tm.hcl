@@ -2,12 +2,12 @@ stack {
   id          = "ca099087-fe30-42f5-b0dd-b2e7d8e5ab34"
   name        = "20-dns-primary"
   description = "Primary authoritative DNS server"
-  tags        = ["dns", "http", "keycloak", "opnsense", "proxmox"]
+  tags        = ["aws", "dns", "http", "keycloak", "opnsense", "proxmox"]
   watch = [
     "/stacks/edge/workloads.yaml",
   ]
 }
 
 globals {
-  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url"]
+  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url", "image_pin"]
 }

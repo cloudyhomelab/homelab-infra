@@ -20,3 +20,10 @@ variable "reverse_zone" {
 locals {
   image_index_url = "http://moria.ip.cloudyhome.net:9000/os-image-staging"
 }
+locals {
+  image_pin = {
+    bucket = "os-image-staging"
+    domain = "infra"
+    prefix = "protected"
+  }
+}
