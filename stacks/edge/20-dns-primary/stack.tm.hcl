@@ -9,5 +9,5 @@ stack {
 }
 
 globals {
-  uses = ["timezone", "dns_zone", "reverse_zone"]
+  uses = ["timezone", "dns_zone", "reverse_zone", "image_index_url"]
 }

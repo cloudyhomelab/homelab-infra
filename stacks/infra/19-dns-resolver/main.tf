@@ -39,16 +39,31 @@ data "terraform_remote_state" "proxmox_base" {
   config  = merge(local.state_backend, { key = "10-proxmox-base.tfstate" })
 }
 
-data "terraform_remote_state" "image_catalog" {
-  backend = "s3"
-  config  = merge(local.state_backend, { key = "15-image-catalog.tfstate" })
+module "image_index" {
+  source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-image-index?ref=main"
+  for_each = local.vm_config
+
+  index_base_url = local.image_index_url
+  image          = local.vms.vms[each.key].image
+  image_version  = local.vms.vms[each.key].image_version
+}
+
+module "image" {
+  source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-proxmox-image?ref=main"
+  for_each = module.image_index
+
+  config = each.value.download
 }
 
 module "vm" {
   source   = "git::https://github.com/cloudyhomelab/terraform-homelab-modules.git//cloudyhome-debian?ref=main"
   for_each = local.vm_config
 
-  image = data.terraform_remote_state.image_catalog.outputs.latest[local.vms.vms[each.key].image].image
+  image = {
+    file_name    = module.image[each.key].file_name
+    content_type = module.image[each.key].content_type
+    datastore_id = module.image[each.key].datastore_id
+  }
 
   ca_server_url    = var.ca_server_url
   ca_sso_realm     = var.ca_sso_realm

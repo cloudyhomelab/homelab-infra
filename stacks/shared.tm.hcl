@@ -13,6 +13,7 @@ globals {
   truenas_app_data_root = "zpool0/cloudyhome_app_data"
   s3_url                = "http://moria.ip.cloudyhome.net:9000"
   s3_region             = "home"
+  image_index_url       = "${global.s3_url}/os-image-staging"
 
   # Keyed by the pve_type global each domain sets
   pve_endpoints = {
@@ -34,6 +35,7 @@ globals {
     "reverse_zone",
     "truenas_app_data_root",
     "s3_url",
+    "image_index_url",
     "acme_dns",
   ]
 }
@@ -166,6 +168,13 @@ generate_hcl "_terramate_generated_shared.tf" {
       condition = tm_contains(global.uses, "s3_url")
       content {
         s3_url = global.s3_url
+      }
+    }
+
+    tm_dynamic "locals" {
+      condition = tm_contains(global.uses, "image_index_url")
+      content {
+        image_index_url = global.image_index_url
       }
     }
 
