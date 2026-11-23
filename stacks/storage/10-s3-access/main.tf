@@ -3,13 +3,6 @@ locals {
   state_buckets = toset(concat(["storage"], keys(local.domains)))
 }
 
-# The buckets predate this stack. Remove after the first apply: a domain added later has no bucket to import.
-import {
-  for_each = local.state_buckets
-  to       = minio_s3_bucket.state[each.key]
-  id       = "${local.state_bucket_prefix}${each.key}"
-}
-
 resource "minio_s3_bucket" "state" {
   for_each = local.state_buckets
 
