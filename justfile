@@ -114,3 +114,7 @@ fmt:
 # Run all pre-commit checks on every file
 lint:
     pre-commit run --all-files
+
+# Pin workloads to their newest image build; no workload means all of them
+update-images *workloads:
+    scripts/update-image-pins.sh {{ workloads }}
