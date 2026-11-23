@@ -1,16 +1,18 @@
 ---
-# Every VM of the domain. Read by 15-image-catalog, which fetches the images named here, by the VM
-# stacks, which pick theirs by key, by 17-storage, and by
-# 35-netbox-addresses, which writes the static addresses to NetBox.
+# Every VM of the domain. Read by the VM stacks, which pick theirs by key and download its pinned
+# image, by 17-storage, which provisions what each pinned image needs, and by 35-netbox-addresses,
+# which writes the static addresses to NetBox.
 # defaults: config fields every VM gets unless it sets its own.
-# vms: key => image (catalog key <os>/<type>), network (VLAN of global-data/ipam.yaml, resolved to a bridge
-#   by 10-proxmox-base) plus the module's other config fields; name defaults to the key.
+# vms: key => image (index key <os>/<type>), image_version (pinned BUILD_VERSION from the image's index),
+#   network (VLAN of global-data/ipam.yaml, resolved to a bridge by 10-proxmox-base) plus the module's other
+#   config fields; name defaults to the key.
 defaults:
   node: pve-lab-1
 
 vms:
   dns-primary:
     image: debian/debian-dns-primary
+    image_version: "20261122-1754"
     name: ns1
     network: DNSNet
     dhcp: false
@@ -21,6 +23,7 @@ vms:
 
   resolver1:
     image: debian/debian-dns-resolver
+    image_version: "20261122-1624"
     network: DNSNet
     dhcp: false
     ip4_address_cidr: 10.88.53.3/28
@@ -30,6 +33,7 @@ vms:
 
   netbox:
     image: debian/debian-netbox
+    image_version: "20261122-1626"
     network: LabNet
     dhcp: false
     ip4_address_cidr: 10.88.16.10/24

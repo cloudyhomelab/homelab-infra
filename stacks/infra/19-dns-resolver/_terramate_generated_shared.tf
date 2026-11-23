@@ -11,3 +11,6 @@ variable "dns_zone" {
   nullable    = false
   type        = string
 }
+locals {
+  image_index_url = "http://moria.ip.cloudyhome.net:9000/os-image-staging"
+}

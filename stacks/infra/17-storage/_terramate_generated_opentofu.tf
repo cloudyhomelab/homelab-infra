@@ -3,6 +3,10 @@
 terraform {
   required_version = ">= 1.11.2"
   required_providers {
+    http = {
+      source  = "hashicorp/http"
+      version = "3.6.3"
+    }
     truenas = {
       source  = "truenas/truenas"
       version = "1.9.3"
