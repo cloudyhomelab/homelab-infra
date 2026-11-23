@@ -1,0 +1,7 @@
+---
+# Domains whose state lives in tofu-state-<domain>. Each gets the S3 user tofu-<domain>, allowed into
+# its own bucket only; storage itself uses the S3 admin credentials.
+domains:
+  edge: {}
+  network: {}
+  infra: {}

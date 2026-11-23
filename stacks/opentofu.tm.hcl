@@ -1,5 +1,5 @@
 globals {
-  # One state bucket per domain: <prefix><domain>; scripts/s3-state.sh creates it
+  # One state bucket per domain: <prefix><domain>; stacks/storage/10-s3-access creates it
   state_bucket_prefix = "tofu-state-"
   state_endpoint      = global.s3_url
   state_region        = global.s3_region
@@ -40,6 +40,11 @@ globals {
       source  = "browningluke/opnsense"
       version = "0.26.0"
       tags    = ["opnsense"]
+    }
+    minio = {
+      source  = "aminueza/minio"
+      version = "3.46.4"
+      tags    = ["minio"]
     }
     truenas = {
       source  = "truenas/truenas"

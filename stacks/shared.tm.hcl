@@ -11,7 +11,9 @@ globals {
   dns_zone              = "ip.cloudyhome.net"
   reverse_zone          = "88.10.in-addr.arpa."
   truenas_app_data_root = "zpool0/cloudyhome_app_data"
-  s3_url                = "http://moria.ip.cloudyhome.net:9000"
+  s3_host               = "moria.ip.cloudyhome.net:9000"
+  s3_ssl                = false
+  s3_url                = "${global.s3_ssl ? "https" : "http"}://${global.s3_host}"
   s3_region             = "home"
   image_index_url       = "${global.s3_url}/os-image-staging"
 
@@ -36,6 +38,7 @@ globals {
     "truenas_app_data_root",
     "s3_url",
     "image_index_url",
+    "state_bucket_prefix",
     "acme_dns",
   ]
 }
@@ -175,6 +178,13 @@ generate_hcl "_terramate_generated_shared.tf" {
       condition = tm_contains(global.uses, "image_index_url")
       content {
         image_index_url = global.image_index_url
+      }
+    }
+
+    tm_dynamic "locals" {
+      condition = tm_contains(global.uses, "state_bucket_prefix")
+      content {
+        state_bucket_prefix = global.state_bucket_prefix
       }
     }
 
