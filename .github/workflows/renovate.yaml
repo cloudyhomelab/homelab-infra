@@ -32,7 +32,7 @@ jobs:
       - name: OpenTofu
         uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
         with:
-          tofu_version: 1.13.9
+          tofu_version: v1.13.10
           tofu_wrapper: false
 
       # Containerbase has no OpenTofu tool; the Renovate container mounts /tmp from the runner
