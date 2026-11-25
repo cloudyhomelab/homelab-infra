@@ -37,7 +37,7 @@ workloads:
 
   lab-ctl:
     image: debian/debian-lab-ingress-control
-    image_version: "20261125-1741"
+    image_version: "20261125-2204"
     network: LabNet
 
   iot-ctl:
@@ -47,7 +47,7 @@ workloads:
 
   edge-ctl:
     image: debian/debian-edge
-    image_version: "20261125-1741"
+    image_version: "20261125-2204"
     network: MgmtNet
     ip4_address_cidr: 10.88.0.211/24
 
@@ -68,7 +68,7 @@ workloads:
 
   resolver2:
     image: debian/debian-dns-resolver
-    image_version: "20261125-1652"
+    image_version: "20261125-2154"
     network: DNSNet
     ip4_address_cidr: 10.88.53.4/28
 
@@ -86,7 +86,7 @@ workloads:
 
   agent:
     image: debian/debian-agent
-    image_version: "20261125-1827"
+    image_version: "20261125-2204"
     network: LabNet
     cores: 2
     memory: 4096

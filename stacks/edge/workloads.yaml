@@ -19,7 +19,7 @@ workloads:
 
   resolver1:
     image: debian/debian-dns-resolver
-    image_version: "20261125-1652"
+    image_version: "20261125-2154"
     network: DNSNet
     ip4_address_cidr: 10.88.53.3/28
     gateway: 10.88.53.1
