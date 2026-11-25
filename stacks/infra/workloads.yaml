@@ -83,3 +83,11 @@ workloads:
     network: LabNet
     cores: 4
     memory: 4096
+
+  agent:
+    image: debian/debian-agent
+    image_version: "20261125-1652"
+    network: LabNet
+    cores: 2
+    memory: 4096
+    disk_size: 20
