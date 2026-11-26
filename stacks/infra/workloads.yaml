@@ -10,7 +10,7 @@ defaults:
 workloads:
   controlplane:
     image: debian/debian-controlplane
-    image_version: "20261125-1652"
+    image_version: "20261125-2316"
     network: MgmtNet
     cpu: host
     cores: 2
@@ -19,12 +19,12 @@ workloads:
 
   runner:
     image: debian/debian-runner
-    image_version: "20261125-1655"
+    image_version: "20261125-2348"
     network: LabNet
 
   observability:
     image: debian/debian-observability
-    image_version: "20261125-1655"
+    image_version: "20261125-2347"
     network: LabNet
     cores: 2
     memory: 4096
@@ -32,28 +32,28 @@ workloads:
 
   mgmt-ctl:
     image: debian/debian-management-ingress-control
-    image_version: "20261125-1654"
+    image_version: "20261125-2336"
     network: MgmtNet
 
   lab-ctl:
     image: debian/debian-lab-ingress-control
-    image_version: "20261125-2204"
+    image_version: "20261126-0745"
     network: LabNet
 
   iot-ctl:
     image: debian/debian-iot-ingress-control
-    image_version: "20261125-1653"
+    image_version: "20261125-2328"
     network: IoTNet
 
   edge-ctl:
     image: debian/debian-edge
-    image_version: "20261125-2204"
+    image_version: "20261126-0745"
     network: MgmtNet
     ip4_address_cidr: 10.88.0.211/24
 
   arr-stack:
     image: debian/debian-arr-stack
-    image_version: "20261125-1652"
+    image_version: "20261126-0745"
     network: LabNet
     cores: 2
     memory: 4096
@@ -61,32 +61,32 @@ workloads:
 
   ns2:
     image: debian/debian-dns-secondary
-    image_version: "20261125-1652"
+    image_version: "20261125-2321"
     network: DNSNet
     ip4_address_cidr: 10.88.53.12/28
     create_dns_record: false
 
   resolver2:
     image: debian/debian-dns-resolver
-    image_version: "20261125-2154"
+    image_version: "20261125-2321"
     network: DNSNet
     ip4_address_cidr: 10.88.53.4/28
 
   homeassistant:
     image: debian/debian-homeassistant
-    image_version: "20261125-1652"
+    image_version: "20261125-2326"
     network: IoTNet
 
   media:
     image: debian/debian-media
-    image_version: "20261125-1654"
+    image_version: "20261125-2338"
     network: LabNet
     cores: 4
     memory: 4096
 
   agent:
     image: debian/debian-agent
-    image_version: "20261125-2204"
+    image_version: "20261126-0002"
     network: LabNet
     cores: 2
     memory: 4096
