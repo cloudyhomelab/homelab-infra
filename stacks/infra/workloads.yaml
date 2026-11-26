@@ -24,7 +24,7 @@ workloads:
 
   observability:
     image: debian/debian-observability
-    image_version: "20261125-2347"
+    image_version: "20261126-1419"
     network: LabNet
     cores: 2
     memory: 4096
@@ -53,7 +53,7 @@ workloads:
 
   arr-stack:
     image: debian/debian-arr-stack
-    image_version: "20261126-0913"
+    image_version: "20261126-1419"
     network: LabNet
     cores: 2
     memory: 4096

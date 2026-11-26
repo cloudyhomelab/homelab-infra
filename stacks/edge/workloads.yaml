@@ -37,7 +37,7 @@ workloads:
 
   netbox:
     image: debian/debian-netbox
-    image_version: "20261125-2341"
+    image_version: "20261126-1449"
     network: LabNet
     ip4_address_cidr: 10.88.16.10/24
     gateway: 10.88.16.1
