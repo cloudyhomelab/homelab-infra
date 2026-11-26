@@ -29,7 +29,7 @@ workloads:
   identity:
     image: debian/debian-identity
     image_version: "20261126-0745"
-    name: auth
+    name: identity
     network: LabNet
     ip4_address_cidr: 10.88.16.11/24
     gateway: 10.88.16.1
