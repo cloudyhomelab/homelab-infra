@@ -53,7 +53,7 @@ workloads:
 
   arr-stack:
     image: debian/debian-arr-stack
-    image_version: "20261126-0745"
+    image_version: "20261126-0913"
     network: LabNet
     cores: 2
     memory: 4096
