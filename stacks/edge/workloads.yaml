@@ -9,7 +9,7 @@ defaults:
 workloads:
   dns-primary:
     image: debian/debian-dns-primary
-    image_version: "20261125-1652"
+    image_version: "20261125-2317"
     name: ns1
     network: DNSNet
     ip4_address_cidr: 10.88.53.11/28
@@ -19,16 +19,25 @@ workloads:
 
   resolver1:
     image: debian/debian-dns-resolver
-    image_version: "20261125-2154"
+    image_version: "20261125-2321"
     network: DNSNet
     ip4_address_cidr: 10.88.53.3/28
     gateway: 10.88.53.1
     dns_addresses: [10.88.53.1]
     create_dns_record: true
 
+  identity:
+    image: debian/debian-identity
+    image_version: "20261126-0745"
+    name: identity
+    network: LabNet
+    ip4_address_cidr: 10.88.16.11/24
+    gateway: 10.88.16.1
+    dns_addresses: [10.88.16.1]
+
   netbox:
     image: debian/debian-netbox
-    image_version: "20261125-1655"
+    image_version: "20261125-2341"
     network: LabNet
     ip4_address_cidr: 10.88.16.10/24
     gateway: 10.88.16.1
